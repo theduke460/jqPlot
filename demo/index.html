@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jqPlot Demo</title>
+
+  <!-- jQuery 3.x from CDN - no longer bundled -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- jqPlot core (built from dist/) -->
+  <link  rel="stylesheet" href="../dist/jquery.jqplot.min.css">
+  <script src="../dist/jquery.jqplot.min.js"></script>
+
+  <!-- Plugins used by this demo -->
+  <script src="../dist/plugins/jqplot.pieRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.donutRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.barRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.pointLabels.min.js"></script>
+  <script src="../dist/plugins/jqplot.highlighter.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #f4f6f9;
+      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      color: #333;
+    }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.8rem;
+      color: #2c3e50;
+    }
+
+    .subtitle {
+      color: #666;
+      margin: 0 0 2.5rem;
+      font-size: 0.95rem;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      flex: 1 1 480px;
+    }
+
+    .chart-card h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.1rem;
+      color: #2c3e50;
+      border-bottom: 2px solid #e8ecf0;
+      padding-bottom: 0.6rem;
+    }
+
+    .chart-container {
+      /* jqPlot needs explicit dimensions on the target div */
+    }
+
+    #pie-chart    { width: 100%; height: 300px; }
+    #donut-chart  { width: 100%; height: 300px; }
+    #bar-chart    { width: 100%; height: 300px; }
+    #hbar-chart   { width: 100%; height: 300px; }
+
+    footer {
+      margin-top: 1rem;
+      color: #999;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>jqPlot Demo</h1>
+  <p class="subtitle">Modernized build — jQuery 3.7 · IE legacy code removed · esbuild pipeline</p>
+
+  <!-- Row 1: Pie + Donut -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Pie Chart — Energy Consumption by Sector</h2>
+      <div id="pie-chart" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Donut Chart — Same Data, Different Appetite</h2>
+      <div id="donut-chart" class="chart-container"></div>
+    </div>
+
+  </div>
+
+  <!-- Row 2: Vertical bar + Horizontal bar -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Bar Chart — Quarterly Travel Expenses</h2>
+      <div id="bar-chart" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Horizontal Bar Chart — Project Completion</h2>
+      <div id="hbar-chart" class="chart-container"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    jqPlot &mdash; modernized fork &mdash;
+    <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+  </footer>
+
+  <script>
+  $(document).ready(function () {
+
+    // ── Pie chart ──────────────────────────────────────────────────────────────
+    var pieData = [
+      ['Heavy Industry', 12],
+      ['Retail',          9],
+      ['Light Industry', 14],
+      ['Out of home',    16],
+      ['Commuting',       7],
+      ['Orientation',     9]
+    ];
+
+    $.jqplot('pie-chart', [pieData], {
+      seriesDefaults: {
+        renderer: $.jqplot.PieRenderer,
+        rendererOptions: {
+          showDataLabels: true,
+          dataLabels:     'percent',
+          sliceMargin:    3,
+          shadow:         true,
+          shadowAlpha:    0.07
+        }
+      },
+      legend: {
+        show:     true,
+        location: 'e',
+        rendererOptions: { numberColumns: 1 }
+      },
+      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+    // ── Donut chart ────────────────────────────────────────────────────────────
+    $.jqplot('donut-chart', [pieData], {
+      seriesDefaults: {
+        renderer: $.jqplot.DonutRenderer,
+        rendererOptions: {
+          sliceMargin:    4,
+          startAngle:    -90,
+          showDataLabels: true,
+          dataLabels:    'value',
+          totalLabel:     true,
+          shadow:         true,
+          shadowAlpha:    0.07
+        }
+      },
+      legend: {
+        show:     true,
+        location: 'e'
+      },
+      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+    // ── Vertical bar chart ─────────────────────────────────────────────────────
+    var hotel   = [200,  600, 700, 1000];
+    var evtReg  = [460, -210, 690,  820];
+    var airfare = [-260, -440, 320,  200];
+    var quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+
+    $.jqplot('bar-chart', [hotel, evtReg, airfare], {
+      seriesDefaults: {
+        renderer: $.jqplot.BarRenderer,
+        rendererOptions: { fillToZero: true, barPadding: 4, barMargin: 10 }
+      },
+      series: [
+        { label: 'Hotel' },
+        { label: 'Event Registration' },
+        { label: 'Airfare' }
+      ],
+      legend: {
+        show:      true,
+        placement: 'outsideGrid'
+      },
+      axes: {
+        xaxis: {
+          renderer: $.jqplot.CategoryAxisRenderer,
+          ticks:    quarters
+        },
+        yaxis: {
+          pad:         1.05,
+          tickOptions: { formatString: '$%d' }
+        }
+      },
+      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+    // ── Horizontal bar chart ───────────────────────────────────────────────────
+    var hbarData = [
+      [[82, 1]],   // Design
+      [[65, 2]],   // Development
+      [[91, 3]],   // QA Testing
+      [[74, 4]],   // Deployment
+      [[58, 5]]    // Documentation
+    ];
+
+    // Each series is one project phase
+    $.jqplot('hbar-chart', [
+      [[82, 1]],
+      [[65, 2]],
+      [[91, 3]],
+      [[74, 4]],
+      [[58, 5]]
+    ], {
+      seriesDefaults: {
+        renderer: $.jqplot.BarRenderer,
+        rendererOptions: {
+          barDirection: 'horizontal',
+          barWidth:     28,
+          shadowOffset: 2
+        },
+        pointLabels: {
+          show:          true,
+          location:      'e',
+          edgeTolerance: -15,
+          formatString:  '%d%%'
+        }
+      },
+      series: [
+        { label: 'Design',        color: '#4e79a7' },
+        { label: 'Development',   color: '#f28e2b' },
+        { label: 'QA Testing',    color: '#59a14f' },
+        { label: 'Deployment',    color: '#e15759' },
+        { label: 'Documentation', color: '#76b7b2' }
+      ],
+      axes: {
+        yaxis: {
+          renderer: $.jqplot.CategoryAxisRenderer,
+          ticks: ['', 'Design', 'Dev', 'QA', 'Deploy', 'Docs']
+        },
+        xaxis: {
+          min: 0,
+          max: 100,
+          tickOptions: { formatString: '%d%%' }
+        }
+      },
+      legend: { show: false },
+      grid:   { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+  });
+  </script>
+
+</body>
+</html>
