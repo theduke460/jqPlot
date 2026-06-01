@@ -21,20 +21,17 @@
     "charting",
     "graphing"
   ],
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "release": "node scripts/build.mjs --zip"
+  },
   "peerDependencies": {
     "jquery": ">=1.9.0"
   },
   "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-clean": "*",
-    "grunt-contrib-compress": "*",
-    "grunt-contrib-concat": "*",
-    "grunt-contrib-copy": "*",
-    "grunt-contrib-cssmin": "*",
-    "grunt-jslint": "*",
-    "grunt-contrib-uglify": "*",
-    "grunt-git-revision": "*",
-    "grunt-natural-docs": "^1.0.1"
+    "esbuild": "*",
+    "clean-css-cli": "*"
   },
   "license": "(MIT AND GPL-2.0)"
 }
