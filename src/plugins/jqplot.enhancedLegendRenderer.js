@@ -199,9 +199,7 @@
 
                                 var speed;
                                 if (typeof(this.seriesToggle) === 'string' || typeof(this.seriesToggle) === 'number') {
-                                    if (!$.jqplot.use_excanvas || !this.disableIEFading) {
-                                        speed = this.seriesToggle;
-                                    }
+                                    speed = this.seriesToggle;
                                 } 
                                 if (this.showSwatches) {
                                     td1.bind('click', {series:s, speed:speed, plot: plot, replot:this.seriesToggleReplot, reverse:reverse}, handleToggle);

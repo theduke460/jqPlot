@@ -38,9 +38,7 @@
  * 
  * jqPlot requires jQuery (1.4+ required for certain features). jQuery 1.4.2 is included in the distribution.  
  * To use jqPlot include jQuery, the jqPlot jQuery plugin, the jqPlot css file and optionally 
- * the excanvas script for IE support in your web page:
- * 
- * > <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+ * jqPlot requires a browser with native canvas support (all modern browsers).
  * > <script language="javascript" type="text/javascript" src="jquery-1.4.4.min.js"></script>
  * > <script language="javascript" type="text/javascript" src="jquery.jqplot.min.js"></script>
  * > <link rel="stylesheet" type="text/css" href="jquery.jqplot.css" />
@@ -94,13 +92,8 @@
         }
   
         // Remove any remaining nodes
-        if ($.jqplot.use_excanvas) {
-          elem.outerHTML = "";
-        }
-        else {
-          while ( elem.firstChild ) {
-            elem.removeChild( elem.firstChild );
-          }
+        while ( elem.firstChild ) {
+          elem.removeChild( elem.firstChild );
         }
 
         elem = null;
@@ -266,16 +259,13 @@
             var canvas;
             var makeNew = true;
             
-            if (!$.jqplot.use_excanvas) {
-                for (var i = 0, l = $.jqplot.CanvasManager.canvases.length; i < l; i++) {
-                    if ($.jqplot.CanvasManager.free[i] === true) {
-                        makeNew = false;
-                        canvas = $.jqplot.CanvasManager.canvases[i];
-                        // $(canvas).removeClass('jqplot-canvasManager-free').addClass('jqplot-canvasManager-inuse');
-                        $.jqplot.CanvasManager.free[i] = false;
-                        myCanvases.push(i);
-                        break;
-                    }
+            for (var i = 0, l = $.jqplot.CanvasManager.canvases.length; i < l; i++) {
+                if ($.jqplot.CanvasManager.free[i] === true) {
+                    makeNew = false;
+                    canvas = $.jqplot.CanvasManager.canvases[i];
+                    $.jqplot.CanvasManager.free[i] = false;
+                    myCanvases.push(i);
+                    break;
                 }
             }
 
@@ -292,10 +282,6 @@
         // this method has to be used after settings the dimesions
         // on the element returned by getCanvas()
         this.initCanvas = function(canvas) {
-            if ($.jqplot.use_excanvas) {
-                return window.G_vmlCanvasManager.initElement(canvas);
-            }
-
             var cctx = canvas.getContext('2d');
 
             var canvasBackingScale = 1;
@@ -325,23 +311,16 @@
         };
 
         this.freeCanvas = function(idx) {
-            if ($.jqplot.use_excanvas && window.G_vmlCanvasManager.uninitElement !== undefined) {
-                // excanvas can't be reused, but properly unset
-                window.G_vmlCanvasManager.uninitElement($.jqplot.CanvasManager.canvases[idx]);
-                $.jqplot.CanvasManager.canvases[idx] = null;
-            } 
-            else {
-                var canvas = $.jqplot.CanvasManager.canvases[idx];
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-                $(canvas).unbind().removeAttr('class').removeAttr('style');
-                // Style attributes seemed to be still hanging around.  wierd.  Some ticks
-                // still retained a left: 0px attribute after reusing a canvas.
-                $(canvas).css({left: '', top: '', position: ''});
-                // setting size to 0 may save memory of unused canvases?
-                canvas.width = 0;
-                canvas.height = 0;
-                $.jqplot.CanvasManager.free[idx] = true;
-            }
+            var canvas = $.jqplot.CanvasManager.canvases[idx];
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            $(canvas).unbind().removeAttr('class').removeAttr('style');
+            // Style attributes seemed to be still hanging around.  wierd.  Some ticks
+            // still retained a left: 0px attribute after reusing a canvas.
+            $(canvas).css({left: '', top: '', position: ''});
+            // setting size to 0 may save memory of unused canvases?
+            canvas.width = 0;
+            canvas.height = 0;
+            $.jqplot.CanvasManager.free[idx] = true;
         };
         
     };
@@ -403,18 +382,12 @@
             
     $.jqplot.support_canvas_text = function() {
         if (typeof $.jqplot.support_canvas_text.result == 'undefined') {
-            if (window.G_vmlCanvasManager !== undefined && window.G_vmlCanvasManager._version > 887) {
-                $.jqplot.support_canvas_text.result = true;
-            }
-            else {
-                $.jqplot.support_canvas_text.result = !!(document.createElement('canvas').getContext && typeof document.createElement('canvas').getContext('2d').fillText == 'function');
-            }
-             
+            $.jqplot.support_canvas_text.result = !!(document.createElement('canvas').getContext && typeof document.createElement('canvas').getContext('2d').fillText == 'function');
         }
         return $.jqplot.support_canvas_text.result;
     };
     
-    $.jqplot.use_excanvas = ((!$.support.boxModel || !$.support.objectAll || !$support.leadingWhitespace) && !$.jqplot.support_canvas()) ? true : false;
+    $.jqplot.use_excanvas = false;
     
     /**
      * 
@@ -1674,11 +1647,6 @@
     // Memory Leaks patch
     $.jqplot.GenericCanvas.prototype.resetCanvas = function() {
       if (this._elem) {
-        if ($.jqplot.use_excanvas && window.G_vmlCanvasManager.uninitElement !== undefined) {
-           window.G_vmlCanvasManager.uninitElement(this._elem.get(0));
-        }
-        
-        //this._elem.remove();
         this._elem.emptyForce();
       }
       
@@ -2270,10 +2238,6 @@
                 for (var j = 0, tlen = t.length; j < tlen; j++) {
                   var el = t[j]._elem;
                   if (el) {
-                    // if canvas renderer
-                    if ($.jqplot.use_excanvas && window.G_vmlCanvasManager.uninitElement !== undefined) {
-                      window.G_vmlCanvasManager.uninitElement(el.get(0));
-                    }
                     el.emptyForce();
                     el = null;
                     t._elem = null;
@@ -2453,10 +2417,6 @@
                 for (var i = 0; i < t.length; i++) {
                   var el = t[i]._elem;
                   if (el) {
-                    // if canvas renderer
-                    if ($.jqplot.use_excanvas && window.G_vmlCanvasManager.uninitElement !== undefined) {
-                      window.G_vmlCanvasManager.uninitElement(el.get(0));
-                    }
                     el.emptyForce();
                     el = null;
                     t._elem = null;

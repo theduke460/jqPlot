@@ -98,11 +98,6 @@
         if ($(this).width() == 0 || $(this).height() == 0) {
             return null;
         }
-
-        // excanvas and hence IE < 9 do not support toDataURL and cannot export images.
-        if ($.jqplot.use_excanvas) {
-            return null;
-        }
         
         var newCanvas = document.createElement("canvas");
         var h = $(this).outerHeight(true);

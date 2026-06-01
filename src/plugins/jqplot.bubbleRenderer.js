@@ -443,10 +443,6 @@
         this._elem.css({ position: 'absolute', left: l, top: t });
         
         this._elem.addClass(klass);
-        if ($.jqplot.use_excanvas) {
-            window.G_vmlCanvasManager.init_(document);
-            elem = window.G_vmlCanvasManager.initElement(elem);
-        }
         
         return this._elem;
     };
@@ -459,7 +455,7 @@
         var x = ctx.canvas.width/2;
         var y = ctx.canvas.height/2;
         ctx.save();
-        if (gradients && !$.jqplot.use_excanvas) {
+        if (gradients) {
             r = r*1.04;
             var comps = $.jqplot.getColorComponents(color);
             var colorinner = 'rgba('+Math.round(comps[0]+0.8*(255-comps[0]))+', '+Math.round(comps[1]+0.8*(255-comps[1]))+', '+Math.round(comps[2]+0.8*(255-comps[2]))+', '+comps[3]+')';
