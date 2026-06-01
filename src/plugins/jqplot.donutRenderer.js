@@ -271,6 +271,7 @@
     };
     
     $.jqplot.DonutRenderer.prototype.drawSlice = function (ctx, ang1, ang2, color, isShadow) {
+        var self = this;
         var r = this._diameter / 2;
         var ri = r - this._thickness;
         var fill = this.fill;
@@ -294,10 +295,10 @@
         function doDraw () {
             // Fix for IE and Chrome that can't seem to draw circles correctly.
             // ang2 should always be <= 2 pi since that is the way the data is converted.
-             if (ang2 > 6.282 + this.startAngle) {
-                ang2 = 6.282 + this.startAngle;
+             if (ang2 > 6.282 + self.startAngle) {
+                ang2 = 6.282 + self.startAngle;
                 if (ang1 > ang2) {
-                    ang1 = 6.281 + this.startAngle;
+                    ang1 = 6.281 + self.startAngle;
                 }
             }
             // Fix for IE, where it can't seem to handle 0 degree angles.  Also avoids
