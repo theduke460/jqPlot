@@ -381,6 +381,12 @@
         //see http://stackoverflow.com/questions/20221461/hidpi-retina-plot-drawing
         var cw = parseInt(ctx.canvas.style.width)  || ctx.canvas.width;
         var ch = parseInt(ctx.canvas.style.height) || ctx.canvas.height;
+        // Guard: if canvas reports implausibly small height (layout not complete),
+        // fall back to the plot target element's actual rendered dimensions.
+        if (ch < 10 && plot && plot.target) {
+            cw = plot.target.width()  || cw;
+            ch = plot.target.height() || ch;
+        }
         var w = cw - offx - 2 * this.padding;
         var h = ch - offy - 2 * this.padding;
         var mindim = Math.min(w,h);

@@ -156,25 +156,29 @@
     });
 
     // ── Donut chart ────────────────────────────────────────────────────────────
-    $.jqplot('donut-chart', [pieData], {
-      seriesDefaults: {
-        renderer: $.jqplot.DonutRenderer,
-        rendererOptions: {
-          sliceMargin:    4,
-          startAngle:    -90,
-          showDataLabels: true,
-          dataLabels:    'value',
-          totalLabel:     true,
-          shadow:         true,
-          shadowAlpha:    0.07
-        }
-      },
-      legend: {
-        show:     true,
-        location: 'e'
-      },
-      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
-    });
+    // setTimeout(0) defers init until after browser layout pass completes,
+    // preventing jqPlot from measuring the canvas before the div has height.
+    setTimeout(function() {
+      $.jqplot('donut-chart', [pieData], {
+        seriesDefaults: {
+          renderer: $.jqplot.DonutRenderer,
+          rendererOptions: {
+            sliceMargin:    4,
+            startAngle:    -90,
+            showDataLabels: true,
+            dataLabels:    'value',
+            totalLabel:     true,
+            shadow:         true,
+            shadowAlpha:    0.07
+          }
+        },
+        legend: {
+          show:     true,
+          location: 'e'
+        },
+        grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+      });
+    }, 0);
 
     // ── Vertical bar chart ─────────────────────────────────────────────────────
     var hotel   = [200,  600, 700, 1000];
