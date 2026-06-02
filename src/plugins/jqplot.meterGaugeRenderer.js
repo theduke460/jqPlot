@@ -366,8 +366,10 @@
         
             
         // pre-draw so can get its dimensions.
+        // Insert with visibility:hidden so it is in the DOM for later positioning
+        // but does not flash at top-left before being moved into place.
         if (this.label) {
-            this._labelElem = $('<div class="jqplot-meterGauge-label" style="position:absolute;">'+this.label+'</div>');
+            this._labelElem = $('<div class="jqplot-meterGauge-label" style="position:absolute;visibility:hidden;">'+this.label+'</div>');
             this.canvas._elem.after(this._labelElem);
         }
         
@@ -382,7 +384,16 @@
         var w = cw - offx - 2 * this.padding;
         var h = ch - offy - 2 * this.padding;
         if (this.labelPosition == 'bottom' && this.label) {
-            h -= this._labelElem.outerHeight(true);
+            // Do not call outerHeight() here — the element has just been inserted
+            // and browsers may return the parent container height rather than the
+            // natural text height, producing a negative h and then a negative radius.
+            // Reserve a fixed amount based on the CSS font-size (1em ≈ 16px) plus
+            // a small margin; the true element height is used later only for positioning.
+            this._labelElemHeight = this._labelElem.outerHeight(true);
+            if (this._labelElemHeight > ch * 0.5) {
+                this._labelElemHeight = Math.round(ch * 0.1) + 4;
+            }
+            h -= this._labelElemHeight;
         }
         var mindim = Math.min(w,h);
         var d = mindim;
@@ -421,7 +432,7 @@
                 this._center = [(cw-trans*offx)/2 + trans * offx, (ch-trans*offy)/2 + trans * offy];
             }
             if (this._labelElem && this.labelPosition == 'bottom') {
-                this._center[1] -= this._labelElem.outerHeight(true);
+                this._center[1] -= this._labelElemHeight || 0;
             }
             
         }
@@ -630,7 +641,7 @@
             ctx.save();
             ctx.beginPath();  
             ctx.fillStyle = this.background;
-            ctx.arc(0, 0, r, outersa, outerea, true);
+            ctx.arc(0, 0, r, outersa, outerea, false);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
@@ -644,7 +655,7 @@
                 ctx.beginPath();  
                 ctx.strokeStyle = shadowColor;
                 ctx.lineWidth = this.shadowWidth;
-                ctx.arc(0 ,0, r, outersa, outerea, true);
+                ctx.arc(0 ,0, r, outersa, outerea, false);
                 ctx.closePath();
                 ctx.stroke();
             }
@@ -657,7 +668,7 @@
                 ctx.translate(this.shadowOffset*Math.cos(this.shadowAngle/180*Math.PI), this.shadowOffset*Math.sin(this.shadowAngle/180*Math.PI));
                 ctx.beginPath();  
                 ctx.fillStyle = shadowColor;
-                ctx.arc(0 ,0, this.hubRadius, hubsa, hubea, true);
+                ctx.arc(0 ,0, this.hubRadius, hubsa, hubea, false);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -668,7 +679,7 @@
             ctx.beginPath();  
             ctx.strokeStyle = this.ringColor;
             ctx.lineWidth = this.ringWidth;
-            ctx.arc(0 ,0, r, outersa, outerea, true);
+            ctx.arc(0 ,0, r, outersa, outerea, false);
             ctx.closePath();
             ctx.stroke();
             ctx.restore();
@@ -678,7 +689,7 @@
             ctx.save();
             ctx.beginPath();  
             ctx.fillStyle = this.hubColor;
-            ctx.arc(0 ,0, this.hubRadius,hubsa, hubea, true);
+            ctx.arc(0 ,0, this.hubRadius,hubsa, hubea, false);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
@@ -697,17 +708,17 @@
                     ctx.beginPath();
                     ctx.lineWidth = 1.5 + this.diameter/360;
                     ctx.strokeStyle = this.ringColor;
-                    var wps = sa - ts*i;
-                    ctx.moveTo(-orad * Math.cos(sa - ts*i), orad * Math.sin(sa - ts*i));
-                    ctx.lineTo(-(orad-tl) * Math.cos(sa - ts*i), (orad - tl) * Math.sin(sa - ts*i));
-                    this._tickPoints.push([(orad-tl) * Math.cos(sa - ts*i) + this._center[0] + this.canvas._offsets.left, (orad - tl) * Math.sin(sa - ts*i) + this._center[1] + this.canvas._offsets.top, sa - ts*i]);
+                    var wps = ts*i+sa;
+                    ctx.moveTo(-orad * Math.cos(ts*i+sa), orad * Math.sin(ts*i+sa));
+                    ctx.lineTo(-(orad-tl) * Math.cos(ts*i+sa), (orad - tl) * Math.sin(ts*i+sa));
+                    this._tickPoints.push([(orad-tl) * Math.cos(ts*i+sa) + this._center[0] + this.canvas._offsets.left, (orad - tl) * Math.sin(ts*i+sa) + this._center[1] + this.canvas._offsets.top, ts*i+sa]);
                     ctx.stroke();
                     ctx.lineWidth = 1.0 + this.diameter/440;
                     if (i<this.ticks.length-1) {
                         for (var j=1; j<=nmt; j++) {
                             ctx.beginPath();
-                            ctx.moveTo(-orad * Math.cos(sa - ts*i - mts*j), orad * Math.sin(sa - ts*i - mts*j));
-                            ctx.lineTo(-(orad-mtl) * Math.cos(sa - ts*i - mts*j), (orad-mtl) * Math.sin(sa - ts*i - mts*j));
+                            ctx.moveTo(-orad * Math.cos(ts*i+mts*j+sa), orad * Math.sin(ts*i+mts*j+sa));
+                            ctx.lineTo(-(orad-mtl) * Math.cos(ts*i+mts*j+sa), (orad-mtl) * Math.sin(ts*i+mts*j+sa));
                             ctx.stroke();
                         }   
                     }
@@ -742,13 +753,13 @@
                 // this.canvas._elem.after(this._labelElem);
                 l -= this._labelElem.outerWidth(true)/2;
                 t -= this._labelElem.outerHeight(true)/2;
-                this._labelElem.css({left:l, top:t});
+                this._labelElem.css({left:l, top:t, visibility:'visible'});
             }
             
             else if (this.label && this.labelPosition == 'bottom') {
                 var l = this._center[0] + this.canvas._offsets.left - this._labelElem.outerWidth(true)/2;
                 var t = this._center[1] + this.canvas._offsets.top + this.innerPad + this.ringWidth + this.padding + this.labelHeightAdjust;
-                this._labelElem.css({left:l, top:t});
+                this._labelElem.css({left:l, top:t, visibility:'visible'});
                 
             }
             
@@ -771,19 +782,19 @@
             var intrange = this.intervals[this.intervals.length-1] - this.min;
             var start, end, span = this.span*Math.PI/180;
             for (i=0; i<this.intervals.length; i++) {
-                start = (i == 0) ? sa : sa - (this.intervals[i-1][0] - this.min)*span/range;
-                if (start > sa) {
-                    start = sa;
+                start = (i == 0) ? sa : sa + (this.intervals[i-1][0] - this.min)*span/range;
+                if (start < 0) {
+                    start = 0;
                 }
-                end = sa - (this.intervals[i][0] - this.min)*span/range;
-                if (end > sa) {
-                    end = sa;
+                end = sa + (this.intervals[i][0] - this.min)*span/range;
+                if (end < 0) {
+                    end = 0;
                 }
                 ctx.beginPath();
                 ctx.fillStyle = this.intervals[i][2];
-                ctx.arc(0, 0, inner, start, end, true);
+                ctx.arc(0, 0, inner, start, end, false);
                 ctx.lineTo(outer*Math.cos(end), outer*Math.sin(end));
-                ctx.arc(0, 0, outer, end, start, false);
+                ctx.arc(0, 0, outer, end, start, true);
                 ctx.lineTo(inner*Math.cos(start), inner*Math.sin(start));
                 ctx.closePath();
                 ctx.fill();
@@ -801,7 +812,7 @@
                     datapoint = this.min - dataspan*3/this.span;
                 }
             }
-            var dataang = this.startAngle - (datapoint - this.min)/dataspan * this.span * Math.PI/180;
+            var dataang = (datapoint - this.min)/dataspan * this.span * Math.PI/180 + this.startAngle;
             
             
             ctx.save();

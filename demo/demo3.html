@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jqPlot Demo 3</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link  rel="stylesheet" href="../dist/jquery.jqplot.min.css">
+  <script src="../dist/jquery.jqplot.min.js"></script>
+
+  <!-- Plugins -->
+  <!-- canvasTextRenderer must precede canvasAxisLabelRenderer (provides CanvasFontRenderer) -->
+  <script src="../dist/plugins/jqplot.canvasTextRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+
+  <!-- pyramid axis/grid deps must load BEFORE pyramidRenderer to suppress its Ajax fallback -->
+  <script src="../dist/plugins/jqplot.pyramidAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.pyramidGridRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.pyramidRenderer.min.js"></script>
+
+  <script src="../dist/plugins/jqplot.funnelRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.mekkoRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.mekkoAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.BezierCurveRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.highlighter.min.js"></script>
+  <script src="../dist/plugins/jqplot.pointLabels.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #f4f6f9;
+      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      color: #333;
+    }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.8rem;
+      color: #2c3e50;
+    }
+
+    .subtitle {
+      color: #666;
+      margin: 0 0 2.5rem;
+      font-size: 0.95rem;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      flex: 1 1 480px;
+    }
+
+    .chart-card.full-width {
+      flex: 1 1 100%;
+    }
+
+    .chart-card h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.1rem;
+      color: #2c3e50;
+      border-bottom: 2px solid #e8ecf0;
+      padding-bottom: 0.6rem;
+    }
+
+    #funnel-chart  { width: 100%; height: 340px; }
+    #mekko-chart   { width: 100%; height: 340px; }
+    #pyramid-chart { width: 100%; height: 380px; }
+    #bezier-chart  { width: 100%; height: 320px; }
+
+    footer {
+      margin-top: 1rem;
+      color: #999;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>jqPlot Demo 3</h1>
+  <p class="subtitle">Funnel · Mekko · Pyramid · Bézier Curve</p>
+
+  <!-- Row 1: Funnel + Mekko -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Funnel Chart — Sales Pipeline</h2>
+      <div id="funnel-chart"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Mekko Chart — Regional Product Revenue</h2>
+      <div id="mekko-chart"></div>
+    </div>
+
+  </div>
+
+  <!-- Row 2: Pyramid (full width) -->
+  <div class="chart-row">
+    <div class="chart-card full-width">
+      <h2>Pyramid Chart — Population by Age Group</h2>
+      <div id="pyramid-chart"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Bezier Curve (full width) -->
+  <div class="chart-row">
+    <div class="chart-card full-width">
+      <h2>Bézier Curve Chart — Quarterly Revenue Projections</h2>
+      <div id="bezier-chart"></div>
+    </div>
+  </div>
+
+  <footer>
+    jqPlot &mdash; modernized fork &mdash;
+    <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+  </footer>
+
+  <script>
+  $(document).ready(function () {
+
+    // ── Funnel Chart — Sales Pipeline ─────────────────────────────────────────
+    // Data format: [label, value]  — renderer sorts descending automatically.
+    var pipeline = [
+      ['Prospects',    9400],
+      ['Qualified',    5800],
+      ['Proposal',     3200],
+      ['Negotiation',  1750],
+      ['Closed Won',    820]
+    ];
+
+    $.jqplot('funnel-chart', [pipeline], {
+      seriesDefaults: {
+        renderer: $.jqplot.FunnelRenderer,
+        rendererOptions: {
+          sectionMargin:   8,
+          widthRatio:      0.25,
+          showDataLabels:  true,
+          dataLabels:      'label',
+          dataLabelThreshold: 2
+        },
+        shadow: true
+      },
+      seriesColors: ['#2980b9', '#27ae60', '#f39c12', '#e67e22', '#c0392b'],
+      legend: {
+        show:     true,
+        location: 'e',
+        border:   'none'
+      },
+      grid: {
+        shadow:      false,
+        background:  '#fff',
+        borderColor: '#e0e0e0'
+      }
+    });
+
+    // ── Mekko Chart — Regional Product Revenue ────────────────────────────────
+    // Each series = one region (one "bar"). Data = [label, value] per product.
+    // Labels in the first series define the product legend entries.
+    var northAmerica = [
+      ['Hardware',  42],
+      ['Software',  58],
+      ['Services',  31],
+      ['Support',   19]
+    ];
+    var europe = [35, 62, 28, 22];
+    var asiaPac = [51, 44, 38, 27];
+
+    var regionLabels = ['North America', 'Europe', 'Asia-Pacific'];
+
+    $.jqplot('mekko-chart', [northAmerica, europe, asiaPac], {
+      seriesDefaults: {
+        renderer:        $.jqplot.MekkoRenderer,
+        rendererOptions: { borderColor: '#fff', showBorders: true }
+      },
+      seriesColors: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12'],
+      legend: {
+        show:     true,
+        location: 'ne',
+        rendererOptions: { placement: 'outsideGrid', numberColumns: 2 }
+      },
+      axesDefaults: {
+        renderer: $.jqplot.MekkoAxisRenderer
+      },
+      axes: {
+        xaxis: {
+          barLabels:   regionLabels,
+          tickOptions: { formatString: '$%dM' }
+        },
+        yaxis: {
+          tickOptions: { formatString: '%d%%' },
+          min: 0,
+          max: 100
+        }
+      },
+      grid: {
+        shadow:      false,
+        background:  '#fff',
+        borderColor: '#e0e0e0'
+      }
+    });
+
+    // ── Pyramid Chart — Population by Age Group ───────────────────────────────
+    // Two series: left (female) and right (male).
+    // Data format: [value, ageGroupIndex] — y axis uses the index to look up ticks.
+    // offsetBars:true + one extra tick frames the bars between tick lines.
+    var ageGroups = ['0–9','10–19','20–29','30–39','40–49',
+                     '50–59','60–69','70–79','80+'];
+
+    // Pyramid data format: [yIndex, xValue] = [ageGroupIndex, populationInThousands]
+    // The renderer maps data[i][0] → y-axis position, data[i][1] → bar width (x-axis)
+    var female = [
+      [1, 4820],[2, 4650],[3, 4410],[4, 4280],[5, 4190],
+      [6, 3870],[7, 3240],[8, 2180],[9, 1050]
+    ];
+    var male = [
+      [1, 5010],[2, 4820],[3, 4560],[4, 4390],[5, 4210],
+      [6, 3740],[7, 3010],[8, 1960],[9,  830]
+    ];
+
+    // Tick array: blank entry at start and end so offsetBars frames each bar
+    var pyramidTicks = [''].concat(ageGroups).concat(['']);
+
+    $.jqplot('pyramid-chart', [female, male], {
+      title: {
+        text: '<span style="margin-left:22%;">← Female</span>' +
+              '<span style="margin-left:30%;">Male →</span>',
+        textAlign: 'left'
+      },
+      defaultAxisStart: 0,
+      seriesDefaults: {
+        renderer: $.jqplot.PyramidRenderer,
+        rendererOptions: {
+          barPadding:  3,
+          offsetBars:  true
+        },
+        shadow: false
+      },
+      series: [
+        {
+          label: 'Female',
+          rendererOptions: {
+            side: 'left',
+            synchronizeHighlight: 1
+          }
+        },
+        {
+          label:  'Male',
+          yaxis:  'y2axis',
+          rendererOptions: {
+            synchronizeHighlight: 0
+          }
+        }
+      ],
+      seriesColors: ['#e91e8c', '#1e88e5'],
+      axes: {
+        yaxis: {
+          ticks: pyramidTicks
+        },
+        y2axis: {
+          ticks: pyramidTicks
+        },
+        xaxis: {
+          tickOptions: { formatString: '%dk' }
+        }
+      },
+      legend: {
+        show:     true,
+        location: 'se'
+      },
+      grid: {
+        shadow:      false,
+        background:  '#fff',
+        borderColor: '#e0e0e0'
+      }
+    });
+
+    // ── Bézier Curve Chart — Quarterly Revenue Projections ────────────────────
+    // 4-point format: [[xstart,ystart],[cp1x,cp1y],[cp2x,cp2y],[xend,yend]]
+    // Each series = one product line, curves stack to show filled areas.
+    var product_A = [[1,120],[2,185],[3,160],[4,210]];
+    var product_B = [[1, 80],[2,110],[3,140],[4,175]];
+    var product_C = [[1, 40],[2, 55],[3, 70],[4, 95]];
+    var product_D = [[1, 20],[2, 30],[3, 35],[4, 50]];
+
+    $.jqplot('bezier-chart', [product_A, product_B, product_C, product_D], {
+      seriesDefaults: {
+        renderer:    $.jqplot.BezierCurveRenderer,
+        shadow:      true,
+        shadowAlpha: 0.07
+      },
+      series: [
+        { label: 'Product A' },
+        { label: 'Product B' },
+        { label: 'Product C' },
+        { label: 'Product D' }
+      ],
+      seriesColors: ['#2980b9', '#27ae60', '#e67e22', '#8e44ad'],
+      legend: {
+        show:     true,
+        location: 'nw'
+      },
+      axes: {
+        xaxis: {
+          // Explicit numeric ticks with string labels
+          ticks:       [1, 2, 3, 4],
+          tickOptions: { showGridline: true },
+          tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+          tickOptions:  { angle: 0, formatString: 'Q%d' }
+        },
+        yaxis: {
+          min:         0,
+          tickOptions: { formatString: '$%d M' }
+        }
+      },
+      grid: {
+        shadow:      false,
+        background:  '#fff',
+        borderColor: '#e0e0e0'
+      }
+    });
+
+  });
+  </script>
+
+</body>
+</html>

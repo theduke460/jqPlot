@@ -214,43 +214,57 @@
     });
 
     // ── Horizontal bar chart ───────────────────────────────────────────────────
-    var hbarData = [
-      [[82, 1]],   // Design
-      [[65, 2]],   // Development
-      [[91, 3]],   // QA Testing
-      [[74, 4]],   // Deployment
-      [[58, 5]]    // Documentation
-    ];
+    // ONE series with all 5 data points [xValue, yIndex].
+    // Using a single series eliminates the _barNudge that jqPlot applies when
+    // multiple series share the same primary axis — that nudge was displacing
+    // bars away from their intended y-tick positions.
+    // varyBarColor:true cycles through seriesColors per bar for distinct colours.
+    // Labels: location='w' places the label's right edge at the bar tip so the
+    // text sits inside the bar. Bold white + 4-direction black text-shadow
+    // gives legibility on any bar colour.
+    var labelStyle = 'font-weight:bold;color:#fff;' +
+      'text-shadow:1px 1px 0 #000,-1px -1px 0 #000,' +
+                  '1px -1px 0 #000,-1px 1px 0 #000;' +
+      'white-space:nowrap;';
 
-    // Each series is one project phase
-    $.jqplot('hbar-chart', [
-      [[82, 1]],
-      [[65, 2]],
-      [[91, 3]],
-      [[74, 4]],
-      [[58, 5]]
-    ], {
+    function hbarLabel(val) {
+      return '<span style="' + labelStyle + '">' + val + '%</span>';
+    }
+
+    // Ticks: ['','Design','Dev','QA','Deploy','Docs',''] sit at positions 1..7.
+    // Named labels occupy positions 2..6, so bars use y=2..6 to match exactly.
+    $.jqplot('hbar-chart', [[
+      [82, 2],   // Design
+      [65, 3],   // Development
+      [91, 4],   // QA Testing
+      [74, 5],   // Deployment
+      [58, 6]    // Documentation
+    ]], {
       seriesDefaults: {
         renderer: $.jqplot.BarRenderer,
         rendererOptions: {
           barDirection: 'horizontal',
           barWidth:     28,
+          varyBarColor: true,
           shadowOffset: 2
         },
         pointLabels: {
           show:          true,
-          location:      'e',
-          edgeTolerance: -15,
-          formatString:  '%d%%'
+          location:      'w',
+          xpadding:      8,
+          escapeHTML:    false,
+          edgeTolerance: -100,
+          labels: [
+            hbarLabel(82),
+            hbarLabel(65),
+            hbarLabel(91),
+            hbarLabel(74),
+            hbarLabel(58)
+          ]
         }
       },
-      series: [
-        { label: 'Design',        color: '#4e79a7' },
-        { label: 'Development',   color: '#f28e2b' },
-        { label: 'QA Testing',    color: '#59a14f' },
-        { label: 'Deployment',    color: '#e15759' },
-        { label: 'Documentation', color: '#76b7b2' }
-      ],
+      // varyBarColor cycles through seriesColors in order, one per data point
+      seriesColors: ['#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2'],
       axes: {
         yaxis: {
           renderer: $.jqplot.CategoryAxisRenderer,
