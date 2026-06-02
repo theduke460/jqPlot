@@ -305,6 +305,7 @@
     
     $.jqplot.PieRenderer.prototype.drawSlice = function (ctx, ang1, ang2, color, isShadow) {
         if (this._drawData) {
+            var self = this;
             var r = this._radius;
             var fill = this.fill;
             var lineWidth = this.lineWidth;
@@ -347,18 +348,20 @@
         }
     
         function doDraw (rad) {
-            // Fix for IE and Chrome that can't seem to draw circles correctly.
+            // Use local copies to prevent mutation of closure variables
+            // across multiple doDraw() calls (shadow depth iterations + real draw).
+            var a1 = ang1, a2 = ang2;
             // ang2 should always be <= 2 pi since that is the way the data is converted.
-            // 2Pi = 6.2831853, Pi = 3.1415927
-             if (ang2 > 6.282 + this.startAngle) {
-                ang2 = 6.282 + this.startAngle;
-                if (ang1 > ang2) {
-                    ang1 = 6.281 + this.startAngle;
+            // Note: startAngle is in degrees; convert to radians for comparison.
+            var saRad = self.startAngle / 180 * Math.PI;
+            if (a2 > 6.282 + saRad) {
+                a2 = 6.282 + saRad;
+                if (a1 > a2) {
+                    a1 = 6.281 + saRad;
                 }
             }
-            // Fix for IE, where it can't seem to handle 0 degree angles.  Also avoids
-            // ugly line on unfilled pies.
-            if (ang1 >= ang2) {
+            // Avoid 0 degree angles and ugly line on unfilled pies.
+            if (a1 >= a2) {
                 return;
             }            
         
@@ -366,7 +369,7 @@
             ctx.fillStyle = color;
             ctx.strokeStyle = color;
             ctx.lineWidth = lineWidth;
-            ctx.arc(0, 0, rad, ang1, ang2, false);
+            ctx.arc(0, 0, rad, a1, a2, false);
             ctx.lineTo(0,0);
             ctx.closePath();
         
