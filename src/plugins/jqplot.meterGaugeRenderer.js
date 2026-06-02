@@ -84,6 +84,9 @@
         // number of strokes to apply to the shadow, 
         // each stroke offset shadowOffset from the last.
         this.shadowDepth = 4;
+        // prop: shadowAngle
+        // Angle of the shadow in degrees.
+        this.shadowAngle = 45;
         // prop: background
         // background color of the inside of the gauge.
         this.background = "#efefef";
@@ -371,8 +374,8 @@
         var shadow = (opts.shadow != undefined) ? opts.shadow : this.shadow;
         var showLine = (opts.showLine != undefined) ? opts.showLine : this.showLine;
         var fill = (opts.fill != undefined) ? opts.fill : this.fill;
-        var cw = parseInt(ctx.canvas.style.width);
-        var ch = parseInt(ctx.canvas.style.height);
+        var cw = parseInt(ctx.canvas.style.width)  || ctx.canvas.width;
+        var ch = parseInt(ctx.canvas.style.height) || ctx.canvas.height;
         if (this.padding == null) {
             this.padding = Math.round(Math.min(cw, ch)/30);
         }

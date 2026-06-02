@@ -115,6 +115,9 @@
         // number of strokes to apply to the shadow, 
         // each stroke offset shadowOffset from the last.
         this.shadowDepth = 5;
+        // prop: shadowAngle
+        // Angle of the shadow in degrees.
+        this.shadowAngle = 45;
         // prop: highlightMouseOver
         // True to highlight area when moused over.
         // This must be false to enable highlightMouseDown to highlight when clicking on a area.
@@ -350,8 +353,8 @@
         var shadow = (opts.shadow != undefined) ? opts.shadow : this.shadow;
         var showLine = (opts.showLine != undefined) ? opts.showLine : this.showLine;
         var fill = (opts.fill != undefined) ? opts.fill : this.fill;
-        var cw =  parseInt(ctx.canvas.style.width);
-        var ch =  parseInt(ctx.canvas.style.height);
+        var cw =  parseInt(ctx.canvas.style.width)  || ctx.canvas.width;
+        var ch =  parseInt(ctx.canvas.style.height) || ctx.canvas.height;
         this._bases[0] = cw - loff - roff;
         var ltot = this._length = ch - toff - boff;
 

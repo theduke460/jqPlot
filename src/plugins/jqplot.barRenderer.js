@@ -68,6 +68,9 @@
         // number of strokes to apply to the shadow, 
         // each stroke offset shadowOffset from the last.
         this.shadowDepth = 5;
+        // prop: shadowAngle
+        // Angle of the shadow in degrees.
+        this.shadowAngle = 45;
         // prop: shadowAlpha
         // transparency of the shadow (0 = transparent, 1 = opaque)
         this.shadowAlpha = 0.08;

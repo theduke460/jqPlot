@@ -114,6 +114,9 @@
         // number of strokes to apply to the shadow, 
         // each stroke offset shadowOffset from the last.
         this.shadowDepth = 5;
+        // prop: shadowAngle
+        // Angle of the shadow in degrees.
+        this.shadowAngle = 45;
         // prop: highlightMouseOver
         // True to highlight slice when moused over.
         // This must be false to enable highlightMouseDown to highlight when clicking on a slice.
@@ -404,7 +407,7 @@
         }
         else {
             // allow use of percentage values for thickness
-            if (this.thickness < 1) {
+            if (this.thickness != null && this.thickness < 1) {
                 this._thickness = mindim / 2 * this.thickness;
             } else {
                 this._thickness = this.thickness || mindim / 2 / (this._numberSeries + 1) * 0.85;

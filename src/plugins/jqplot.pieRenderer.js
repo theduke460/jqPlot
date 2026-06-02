@@ -105,6 +105,9 @@
         // number of strokes to apply to the shadow, 
         // each stroke offset shadowOffset from the last.
         this.shadowDepth = 5;
+        // prop: shadowAngle
+        // Angle of the shadow in degrees.
+        this.shadowAngle = 45;
         // prop: highlightMouseOver
         // True to highlight slice when moused over.
         // This must be false to enable highlightMouseDown to highlight when clicking on a slice.
