@@ -3,23 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>jqPlot Demo</title>
-
-  <!-- jQuery 3.x from CDN - no longer bundled -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-  <!-- jqPlot core (built from dist/) -->
-  <link  rel="stylesheet" href="../dist/jquery.jqplot.min.css">
-  <script src="../dist/jquery.jqplot.min.js"></script>
-
-  <!-- Plugins used by this demo -->
-  <script src="../dist/plugins/jqplot.pieRenderer.min.js"></script>
-  <script src="../dist/plugins/jqplot.donutRenderer.min.js"></script>
-  <script src="../dist/plugins/jqplot.barRenderer.min.js"></script>
-  <script src="../dist/plugins/jqplot.categoryAxisRenderer.min.js"></script>
-  <script src="../dist/plugins/jqplot.pointLabels.min.js"></script>
-  <script src="../dist/plugins/jqplot.highlighter.min.js"></script>
-
+  <title>jqPlot Demos</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -85,205 +69,16 @@
 </head>
 <body>
 
-  <h1>jqPlot Demo</h1>
-  <p class="subtitle">Modernized build — jQuery 3.7 · IE legacy code removed · esbuild pipeline</p>
+<h1>2026: jqPlot Demo Pages</h1>
+<p>
+The following pages provide examples of jqPlot graph types:
+<ul>
+<li><a href="demo1.html">DEMO1</a>
+<li><a href="demo2.html">DEMO2</a>
+<li><a href="demo3.html">DEMO3</a>
+<li><a href="demo4.html">DEMO4</a>
+</ul>
 
-  <!-- Row 1: Pie + Donut -->
-  <div class="chart-row">
-
-    <div class="chart-card">
-      <h2>Pie Chart — Energy Consumption by Sector</h2>
-      <div id="pie-chart" class="chart-container"></div>
-    </div>
-
-    <div class="chart-card">
-      <h2>Donut Chart — Same Data, Different Appetite</h2>
-      <div id="donut-chart" class="chart-container"></div>
-    </div>
-
-  </div>
-
-  <!-- Row 2: Vertical bar + Horizontal bar -->
-  <div class="chart-row">
-
-    <div class="chart-card">
-      <h2>Bar Chart — Quarterly Travel Expenses</h2>
-      <div id="bar-chart" class="chart-container"></div>
-    </div>
-
-    <div class="chart-card">
-      <h2>Horizontal Bar Chart — Project Completion</h2>
-      <div id="hbar-chart" class="chart-container"></div>
-    </div>
-
-  </div>
-
-  <footer>
-    jqPlot &mdash; modernized fork &mdash;
-    <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
-  </footer>
-
-  <script>
-  $(document).ready(function () {
-
-    // ── Pie chart ──────────────────────────────────────────────────────────────
-    var pieData = [
-      ['Heavy Industry', 12],
-      ['Retail',          9],
-      ['Light Industry', 14],
-      ['Out of home',    16],
-      ['Commuting',       7],
-      ['Orientation',     9]
-    ];
-
-    $.jqplot('pie-chart', [pieData], {
-      seriesDefaults: {
-        renderer: $.jqplot.PieRenderer,
-        rendererOptions: {
-          showDataLabels: true,
-          dataLabels:     'percent',
-          sliceMargin:    3,
-          shadow:         true,
-          shadowAlpha:    0.07
-        }
-      },
-      legend: {
-        show:     true,
-        location: 'e',
-        rendererOptions: { numberColumns: 1 }
-      },
-      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
-    });
-
-    // ── Donut chart ────────────────────────────────────────────────────────────
-    // setTimeout(0) defers init until after browser layout pass completes,
-    // preventing jqPlot from measuring the canvas before the div has height.
-    setTimeout(function() {
-      $.jqplot('donut-chart', [pieData], {
-        seriesDefaults: {
-          renderer: $.jqplot.DonutRenderer,
-          rendererOptions: {
-            sliceMargin:    4,
-            startAngle:    -90,
-            showDataLabels: true,
-            dataLabels:    'value',
-            totalLabel:     true,
-            shadow:         true,
-            shadowAlpha:    0.07
-          }
-        },
-        legend: {
-          show:     true,
-          location: 'e'
-        },
-        grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
-      });
-    }, 0);
-
-    // ── Vertical bar chart ─────────────────────────────────────────────────────
-    var hotel   = [200,  600, 700, 1000];
-    var evtReg  = [460, -210, 690,  820];
-    var airfare = [-260, -440, 320,  200];
-    var quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-
-    $.jqplot('bar-chart', [hotel, evtReg, airfare], {
-      seriesDefaults: {
-        renderer: $.jqplot.BarRenderer,
-        rendererOptions: { fillToZero: true, barPadding: 4, barMargin: 10 }
-      },
-      series: [
-        { label: 'Hotel' },
-        { label: 'Event Registration' },
-        { label: 'Airfare' }
-      ],
-      legend: {
-        show:      true,
-        placement: 'outsideGrid'
-      },
-      axes: {
-        xaxis: {
-          renderer: $.jqplot.CategoryAxisRenderer,
-          ticks:    quarters
-        },
-        yaxis: {
-          pad:         1.05,
-          tickOptions: { formatString: '$%d' }
-        }
-      },
-      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
-    });
-
-    // ── Horizontal bar chart ───────────────────────────────────────────────────
-    // ONE series with all 5 data points [xValue, yIndex].
-    // Using a single series eliminates the _barNudge that jqPlot applies when
-    // multiple series share the same primary axis — that nudge was displacing
-    // bars away from their intended y-tick positions.
-    // varyBarColor:true cycles through seriesColors per bar for distinct colours.
-    // Labels: location='w' places the label's right edge at the bar tip so the
-    // text sits inside the bar. Bold white + 4-direction black text-shadow
-    // gives legibility on any bar colour.
-    var labelStyle = 'font-weight:bold;color:#fff;' +
-      'text-shadow:1px 1px 0 #000,-1px -1px 0 #000,' +
-                  '1px -1px 0 #000,-1px 1px 0 #000;' +
-      'white-space:nowrap;';
-
-    function hbarLabel(val) {
-      return '<span style="' + labelStyle + '">' + val + '%</span>';
-    }
-
-    // Ticks: ['','Design','Dev','QA','Deploy','Docs',''] sit at positions 1..7.
-    // Named labels occupy positions 2..6, so bars use y=2..6 to match exactly.
-    $.jqplot('hbar-chart', [[
-      [82, 2],   // Design
-      [65, 3],   // Development
-      [91, 4],   // QA Testing
-      [74, 5],   // Deployment
-      [58, 6]    // Documentation
-    ]], {
-      seriesDefaults: {
-        renderer: $.jqplot.BarRenderer,
-        rendererOptions: {
-          barDirection: 'horizontal',
-          barWidth:     28,
-          varyBarColor: true,
-          shadowOffset: 2
-        },
-        pointLabels: {
-          show:          true,
-          location:      'w',
-          xpadding:      8,
-          escapeHTML:    false,
-          edgeTolerance: -100,
-          labels: [
-            hbarLabel(82),
-            hbarLabel(65),
-            hbarLabel(91),
-            hbarLabel(74),
-            hbarLabel(58)
-          ]
-        }
-      },
-      // varyBarColor cycles through seriesColors in order, one per data point
-      seriesColors: ['#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2'],
-      axes: {
-        yaxis: {
-          renderer: $.jqplot.CategoryAxisRenderer,
-          ticks: ['', 'Design', 'Dev', 'QA', 'Deploy', 'Docs', ''],
-          pad: 1.0
-        },
-        xaxis: {
-          min: 0,
-          max: 100,
-          tickOptions: { formatString: '%d%%' }
-        }
-      },
-      legend: { show: false },
-      grid:   { shadow: false, background: '#fff', borderColor: '#e0e0e0' },
-      gridPadding: { top: 20, bottom: 10 }
-    });
-
-  });
-  </script>
 
 </body>
 </html>

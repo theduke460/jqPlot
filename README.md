@@ -1,88 +1,267 @@
-jQPlot
-======
+# jqPlot
 
 Pure JavaScript plotting plugin for jQuery.
 
-[![Join the chat at https://gitter.im/jqPlot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jqPlot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+**Project source**: https://github.com/theduke460/jqPlot
 
-**jqPlot home page**: http://www.jqplot.com
+---
 
-**Users forum**: http://groups.google.com/group/jqplot-users
+## History
 
-**Developers forum**: http://groups.google.com/group/jqplot-dev
+jqPlot is a legacy JavaScript/jQuery data plotting library that had fallen out
+of maintenance, however it produces graphs that are arguably aesthetically
+superior to more modern graphing frameworks.  With the advent of AI it has been
+possible to, with significant effort, resurrect this library.  Some features
+may still have some issues (most have been tested and are represented in the
+'demo*.html' pages in the demo folder), however all features will soon be tested.
 
-**Examples and unit tests**: http://www.jqplot.com/examples
+If jqPlot does not have an active web presence, then that will be taken care of
+as well.
 
-**Documentation**: http://www.jqplot.com/docs/
+## Overview
 
-**Project page and source code**: http://www.github.com/jqPlot/jqPlot
+jqPlot is a plotting and charting plugin for the jQuery JavaScript framework.
+It produces line, bar, pie, donut, bubble, candlestick, funnel, mekko, pyramid,
+meter gauge, block, and Bézier curve charts — all rendered on HTML5 canvas —
+with a rich set of enhancement plugins for trendlines, point labels, date axes,
+highlighting, drag-and-drop, and more.
 
-**Bugs, issues, feature requests**: http://www.github.com/jqPlot/jqPlot/issues
+This is a modernized fork of the original jqPlot project.  The legacy IE/excanvas
+compatibility shims, the Grunt toolchain, and the bundled jQuery copy have all
+been removed.  The build pipeline now uses **esbuild** and **clean-css**.
 
-# Basic Usage Instructions
+---
 
-jqPlot requires jQuery (1.4+ required for certain features). jQuery 1.9.1 is included in the distribution.
+## Basic Usage
 
-To use jqPlot, include jQuery, the jqPlot jQuery plugin, the jqPlot css file and optionally the excanvas script to support IE version prior to IE 9 in your web page:
+jqPlot requires **jQuery 1.9 or later**.  Load jQuery from a CDN (recommended),
+then include the jqPlot core and CSS from `dist/`:
+
+```html
+<link  rel="stylesheet" href="dist/jquery.jqplot.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="dist/jquery.jqplot.min.js"></script>
+```
+
+Load any plugins you need from `dist/plugins/`.  **Plugin load order matters** —
+if one plugin depends on another, the dependency must appear first:
+
+```html
+<!-- canvasTextRenderer must precede canvasAxisLabelRenderer -->
+<script src="dist/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script src="dist/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+
+<!-- pyramid axis/grid renderers must precede pyramidRenderer -->
+<script src="dist/plugins/jqplot.pyramidAxisRenderer.min.js"></script>
+<script src="dist/plugins/jqplot.pyramidGridRenderer.min.js"></script>
+<script src="dist/plugins/jqplot.pyramidRenderer.min.js"></script>
+```
+
+Then create a chart by calling `$.jqplot()` on a target `<div>` with explicit
+width and height:
+
+```html
+<div id="chart" style="width:480px; height:300px;"></div>
+<script>
+$(document).ready(function () {
+    $.jqplot('chart', [[3, 7, 9, 5, 12]], {
+        grid: { shadow: false },
+        series: [{ label: 'Series 1' }],
+        legend: { show: true }
+    });
+});
+</script>
+```
+
+---
+
+## Chart Types
+
+### Core (no plugin required)
+
+| Type | Notes |
+|------|-------|
+| **Line** | Default renderer. Also supports area (filled), scatter (markers only), and step variants via series options. |
+
+### Renderer Plugins
+
+| Plugin file | Chart type |
+|-------------|------------|
+| `jqplot.barRenderer` | Vertical and horizontal bar charts; stacked bars |
+| `jqplot.pieRenderer` | Pie charts |
+| `jqplot.donutRenderer` | Donut / ring charts |
+| `jqplot.bubbleRenderer` | Bubble charts |
+| `jqplot.ohlcRenderer` | OHLC, Candlestick, and Hi-Low-Close financial charts |
+| `jqplot.funnelRenderer` | Funnel / sales-pipeline charts |
+| `jqplot.mekkoRenderer` | Marimekko / mosaic charts (requires `mekkoAxisRenderer`) |
+| `jqplot.pyramidRenderer` | Population pyramid charts (requires `pyramidAxisRenderer` + `pyramidGridRenderer`, both of which **must be loaded before** `pyramidRenderer`) |
+| `jqplot.meterGaugeRenderer` | Speedometer-style gauge |
+| `jqplot.blockRenderer` | Block / scatter-label charts |
+| `jqplot.BezierCurveRenderer` | Smooth Bézier curve series |
+
+### Axis Plugins
+
+| Plugin file | Purpose |
+|-------------|---------|
+| `jqplot.categoryAxisRenderer` | String / categorical tick labels |
+| `jqplot.dateAxisRenderer` | Time-series x-axis with date parsing and strftime formatting |
+| `jqplot.logAxisRenderer` | Logarithmic scale axis |
+| `jqplot.canvasAxisLabelRenderer` | Rotated axis labels on canvas (requires `canvasTextRenderer`) |
+| `jqplot.canvasAxisTickRenderer` | Rotated tick labels on canvas (requires `canvasTextRenderer`) |
+
+### Enhancement Plugins
+
+| Plugin file | Purpose |
+|-------------|---------|
+| `jqplot.trendline` | Computed linear or exponential trendline overlay on any series |
+| `jqplot.pointLabels` | Data-value labels placed at each data point |
+| `jqplot.highlighter` | Tooltip on mouse hover |
+| `jqplot.cursor` | Crosshair cursor with coordinate display |
+| `jqplot.canvasOverlay` | Draw arbitrary shapes and lines on top of any chart |
+| `jqplot.dragable` | Draggable data points |
+
+---
+
+## Building from Source
+
+### Requirements
+
+- **Node.js** 18 or later
+- **npm** (included with Node.js)
+
+The build uses [esbuild](https://esbuild.github.io/) for JavaScript bundling
+and minification, and [clean-css-cli](https://github.com/clean-css/clean-css-cli)
+for CSS minification.  Both are installed automatically via `npm install`.
+
+> **Note:** The legacy Grunt-based build (`Gruntfile.js`) is retained in the
+> repository for reference but is no longer the active build system.  Use the
+> npm scripts below.
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Build
+
+Compile all source files in `src/` into the `dist/` directory:
+
+```bash
+npm run build
+```
+
+This produces:
 
 ```
-<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
-<script language="javascript" type="text/javascript" src="jquery-1.9.1.min.js"></script>
-<script language="javascript" type="text/javascript" src="jquery.jqplot.min.js"></script>
-<link rel="stylesheet" type="text/css" href="jquery.jqplot.css" />
+dist/
+  jquery.jqplot.js        # concatenated core (unminified)
+  jquery.jqplot.min.js    # minified core
+  jquery.jqplot.css       # stylesheet (token-substituted)
+  jquery.jqplot.min.css   # minified stylesheet
+  plugins/
+    jqplot.*.js           # individual plugins (unminified)
+    jqplot.*.min.js       # individual plugins (minified)
 ```
 
-For more information, see the [documentation](http://www.jqplot.com/docs) and [examples](http://www.jqplot.com/examples).
+The `dist/` directory is **not committed to the repository** (it is listed in
+`.gitignore`).  Run `npm run build` after every clone or after any source change
+before serving pages that reference `dist/`.
 
-# Building from source
+### Release archive
 
-If you've cloned the repository, you can build a distribution from source.
+Create a distributable `.zip` of the entire `dist/` directory:
 
-## Requirements and build tools
+```bash
+npm run release
+```
 
-- Install [NodeJS](https://nodejs.org/en/download/)
-- jQplot is [a NPM module](https://docs.npmjs.com/getting-started/what-is-npm)
-- Grunt is used to build the application and documentation from source. [What is Grunt](http://gruntjs.com/getting-started)
+This produces `jquery.jqplot.<version>.zip` in the repo root.
 
-## Getting started
+---
 
-1. Fork the repo
-2. Clone the repository into the folder of your choice.
-3. Install Node.JS
-4. Run `npm install` to install the necessary "npm" dependencies like "grunt".
+## Demo Pages
 
-## Building with grunt
+The `demo/` directory contains example pages that reference `dist/` with relative
+paths (`../dist/`).  Serve them through a web server (not via `file://` URLs) to
+avoid browser security restrictions on local file access.
 
-Build the application and all the documentation, plus create the zip file, ready for distribution with this command:
+| File | Contents |
+|------|----------|
+| `demo/index.html` | Pie, Donut, Vertical Bar, Horizontal Bar |
+| `demo/demo2.html` | Line + Trendline, Bubble, Candlestick, Meter Gauges |
+| `demo/demo3.html` | Funnel, Mekko, Pyramid, Bézier Curve |
+| `demo/demo5.html` | Block, Trendline, Point Labels, Date Axis |
 
-    grunt
+> **Nginx / reverse-proxy caching note:** jqPlot's JavaScript and CSS files are
+> typically served with long `Cache-Control` / `Expires` headers.  After a build,
+> force the browser to fetch updated files with a hard refresh (`Ctrl+Shift+R`),
+> or temporarily set `expires -1` in your Nginx location block during development.
 
-Create the application without compression for local use with the command:
+---
 
-    grunt build
+## Plugin Load Order
 
-# Legal Notices
+Some plugins depend on others and **must** be loaded in the correct order or
+the dependent plugin will attempt to fetch its dependency via an Ajax call
+(which will fail unless `$.jqplot.pluginLocation` is configured):
 
-Copyright (c) 2009-2015 Chris Leonello
+| Load first | Then load |
+|------------|-----------|
+| `canvasTextRenderer` | `canvasAxisLabelRenderer`, `canvasAxisTickRenderer` |
+| `pyramidAxisRenderer`, `pyramidGridRenderer` | `pyramidRenderer` |
+| `mekkoAxisRenderer` | `mekkoRenderer` (or load together — order is flexible here) |
 
-jqPlot is currently available for use in all personal or commercial projects
-under both the MIT and GPL version 2.0 licenses. This means that you can
-choose the license that best suits your project and use it accordingly.
+---
 
-jqPlot includes date instance methods and printf/sprintf functions by other authors:
+## Date Axis Format Strings
 
-## Date instance methods
+`dateAxisRenderer` uses **strftime** codes in `tickOptions.formatString`:
+
+| Code | Example | Meaning |
+|------|---------|---------|
+| `%Y` | `2024` | 4-digit year |
+| `%y` | `24` | 2-digit year |
+| `%b` | `Apr` | Abbreviated month name |
+| `%B` | `April` | Full month name |
+| `%m` | `04` | Month number (zero-padded) |
+| `%e` | `8` | Day of month (no leading zero) |
+| `%d` | `08` | Day of month (zero-padded) |
+| `%a` | `Mon` | Abbreviated weekday |
+| `%H` | `14` | Hour, 24h (zero-padded) |
+| `%M` | `30` | Minutes (zero-padded) |
+
+Common combinations:
+
+```javascript
+tickOptions: { formatString: '%b %e' }       // Apr 8
+tickOptions: { formatString: '%b %e, %Y' }   // Apr 8, 2024
+tickOptions: { formatString: '%B %Y' }       // April 2024
+tickOptions: { formatString: '%Y-%m-%d' }    // 2024-04-08
+tickOptions: { formatString: '%H:%M' }       // 14:30  (intraday)
+```
+
+`tickInterval` accepts human-readable strings: `'1 day'`, `'2 weeks'`,
+`'1 month'`, `'6 hours'`, etc.
+
+---
+
+## Legal Notices
+
+Copyright (c) 2009-2026 Chris Leonello
+
+jqPlot is available under both the **MIT** and **GPL version 2.0** licenses.
+Choose whichever best suits your project.
+
+### Date instance methods
 
 Author: Ken Snyder (ken d snyder at gmail dot com)
-Date: 2008-09-10
-Version: 2.0.2 (http://kendsnyder.com/sandbox/date/)
-License: Creative Commons Attribution License 3.0 (http://creativecommons.org/licenses/by/3.0/)
+Date: 2008-09-10 · Version: 2.0.2
+http://kendsnyder.com/sandbox/date/
+License: Creative Commons Attribution License 3.0
 
-## JavaScript printf/sprintf functions
+### JavaScript printf/sprintf functions
 
-Author: Ash Searle
-Version: 2007.04.27
+Author: Ash Searle · Version: 2007.04.27
 http://hexmen.com/blog/2007/03/printf-sprintf/
-http://hexmen.com/js/sprintf.js
-The author (Ash Searle) has placed this code in the public domain:
-"This code is unrestricted: you are free to use it however you like."
+The author has placed this code in the public domain.
