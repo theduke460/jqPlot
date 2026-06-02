@@ -144,8 +144,11 @@
     // ── Line chart with trendline ──────────────────────────────────────────────
     var s1 = [142, 168, 155, 189, 204, 198, 225, 247, 231, 268, 289, 312];
     var s2 = [98,  112, 108, 127, 135, 142, 158, 163, 171, 189, 201, 215];
+    // ticks must be [value, label] pairs so the axis has a numeric min/max;
+    // plain string arrays produce NaN from series_u2p(), collapsing all x coords.
     var months = ['Jan','Feb','Mar','Apr','May','Jun',
-                  'Jul','Aug','Sep','Oct','Nov','Dec'];
+                  'Jul','Aug','Sep','Oct','Nov','Dec']
+                 .map(function(m, i) { return [i + 1, m]; });
 
     $.jqplot('line-chart', [s1, s2], {
       series: [

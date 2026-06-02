@@ -630,7 +630,7 @@
             ctx.save();
             ctx.beginPath();  
             ctx.fillStyle = this.background;
-            ctx.arc(0, 0, r, outersa, outerea, false);
+            ctx.arc(0, 0, r, outersa, outerea, true);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
@@ -644,7 +644,7 @@
                 ctx.beginPath();  
                 ctx.strokeStyle = shadowColor;
                 ctx.lineWidth = this.shadowWidth;
-                ctx.arc(0 ,0, r, outersa, outerea, false);
+                ctx.arc(0 ,0, r, outersa, outerea, true);
                 ctx.closePath();
                 ctx.stroke();
             }
@@ -657,7 +657,7 @@
                 ctx.translate(this.shadowOffset*Math.cos(this.shadowAngle/180*Math.PI), this.shadowOffset*Math.sin(this.shadowAngle/180*Math.PI));
                 ctx.beginPath();  
                 ctx.fillStyle = shadowColor;
-                ctx.arc(0 ,0, this.hubRadius, hubsa, hubea, false);
+                ctx.arc(0 ,0, this.hubRadius, hubsa, hubea, true);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -668,7 +668,7 @@
             ctx.beginPath();  
             ctx.strokeStyle = this.ringColor;
             ctx.lineWidth = this.ringWidth;
-            ctx.arc(0 ,0, r, outersa, outerea, false);
+            ctx.arc(0 ,0, r, outersa, outerea, true);
             ctx.closePath();
             ctx.stroke();
             ctx.restore();
@@ -678,7 +678,7 @@
             ctx.save();
             ctx.beginPath();  
             ctx.fillStyle = this.hubColor;
-            ctx.arc(0 ,0, this.hubRadius,hubsa, hubea, false);
+            ctx.arc(0 ,0, this.hubRadius,hubsa, hubea, true);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
@@ -697,17 +697,17 @@
                     ctx.beginPath();
                     ctx.lineWidth = 1.5 + this.diameter/360;
                     ctx.strokeStyle = this.ringColor;
-                    var wps = ts*i+sa;
-                    ctx.moveTo(-orad * Math.cos(ts*i+sa), orad * Math.sin(ts*i+sa));
-                    ctx.lineTo(-(orad-tl) * Math.cos(ts*i+sa), (orad - tl) * Math.sin(ts*i+sa));
-                    this._tickPoints.push([(orad-tl) * Math.cos(ts*i+sa) + this._center[0] + this.canvas._offsets.left, (orad - tl) * Math.sin(ts*i+sa) + this._center[1] + this.canvas._offsets.top, ts*i+sa]);
+                    var wps = sa - ts*i;
+                    ctx.moveTo(-orad * Math.cos(sa - ts*i), orad * Math.sin(sa - ts*i));
+                    ctx.lineTo(-(orad-tl) * Math.cos(sa - ts*i), (orad - tl) * Math.sin(sa - ts*i));
+                    this._tickPoints.push([(orad-tl) * Math.cos(sa - ts*i) + this._center[0] + this.canvas._offsets.left, (orad - tl) * Math.sin(sa - ts*i) + this._center[1] + this.canvas._offsets.top, sa - ts*i]);
                     ctx.stroke();
                     ctx.lineWidth = 1.0 + this.diameter/440;
                     if (i<this.ticks.length-1) {
                         for (var j=1; j<=nmt; j++) {
                             ctx.beginPath();
-                            ctx.moveTo(-orad * Math.cos(ts*i+mts*j+sa), orad * Math.sin(ts*i+mts*j+sa));
-                            ctx.lineTo(-(orad-mtl) * Math.cos(ts*i+mts*j+sa), (orad-mtl) * Math.sin(ts*i+mts*j+sa));
+                            ctx.moveTo(-orad * Math.cos(sa - ts*i - mts*j), orad * Math.sin(sa - ts*i - mts*j));
+                            ctx.lineTo(-(orad-mtl) * Math.cos(sa - ts*i - mts*j), (orad-mtl) * Math.sin(sa - ts*i - mts*j));
                             ctx.stroke();
                         }   
                     }
@@ -771,19 +771,19 @@
             var intrange = this.intervals[this.intervals.length-1] - this.min;
             var start, end, span = this.span*Math.PI/180;
             for (i=0; i<this.intervals.length; i++) {
-                start = (i == 0) ? sa : sa + (this.intervals[i-1][0] - this.min)*span/range;
-                if (start < 0) {
-                    start = 0;
+                start = (i == 0) ? sa : sa - (this.intervals[i-1][0] - this.min)*span/range;
+                if (start > sa) {
+                    start = sa;
                 }
-                end = sa + (this.intervals[i][0] - this.min)*span/range;
-                if (end < 0) {
-                    end = 0;
+                end = sa - (this.intervals[i][0] - this.min)*span/range;
+                if (end > sa) {
+                    end = sa;
                 }
                 ctx.beginPath();
                 ctx.fillStyle = this.intervals[i][2];
-                ctx.arc(0, 0, inner, start, end, false);
+                ctx.arc(0, 0, inner, start, end, true);
                 ctx.lineTo(outer*Math.cos(end), outer*Math.sin(end));
-                ctx.arc(0, 0, outer, end, start, true);
+                ctx.arc(0, 0, outer, end, start, false);
                 ctx.lineTo(inner*Math.cos(start), inner*Math.sin(start));
                 ctx.closePath();
                 ctx.fill();
@@ -801,7 +801,7 @@
                     datapoint = this.min - dataspan*3/this.span;
                 }
             }
-            var dataang = (datapoint - this.min)/dataspan * this.span * Math.PI/180 + this.startAngle;
+            var dataang = this.startAngle - (datapoint - this.min)/dataspan * this.span * Math.PI/180;
             
             
             ctx.save();
