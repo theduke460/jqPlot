@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jqPlot Demo 2</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link  rel="stylesheet" href="../dist/jquery.jqplot.min.css">
+  <script src="../dist/jquery.jqplot.min.js"></script>
+
+  <!-- Plugins -->
+  <script src="../dist/plugins/jqplot.dateAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.ohlcRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.bubbleRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.meterGaugeRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.trendline.min.js"></script>
+  <script src="../dist/plugins/jqplot.highlighter.min.js"></script>
+  <script src="../dist/plugins/jqplot.cursor.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #f4f6f9;
+      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      color: #333;
+    }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.8rem;
+      color: #2c3e50;
+    }
+
+    .subtitle {
+      color: #666;
+      margin: 0 0 2.5rem;
+      font-size: 0.95rem;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      flex: 1 1 480px;
+    }
+
+    .chart-card h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.1rem;
+      color: #2c3e50;
+      border-bottom: 2px solid #e8ecf0;
+      padding-bottom: 0.6rem;
+    }
+
+    #line-chart   { width: 100%; height: 300px; }
+    #bubble-chart { width: 100%; height: 300px; }
+    #ohlc-chart   { width: 100%; height: 300px; }
+    #gauge-row    { display: flex; gap: 1rem; justify-content: space-around; }
+    .gauge-wrap   { flex: 1 1 120px; }
+    .gauge-wrap div { width: 100%; height: 180px; }
+    .gauge-label  { text-align: center; font-size: 0.8rem; color: #666; margin-top: 0.4rem; }
+
+    footer {
+      margin-top: 1rem;
+      color: #999;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>jqPlot Demo 2</h1>
+  <p class="subtitle">Line · Bubble · Candlestick · Meter Gauges</p>
+
+  <!-- Row 1: Line chart -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <h2>Line Chart — Monthly Sales with Trendline</h2>
+      <div id="line-chart"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Bubble + Candlestick -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Bubble Chart — Market Share vs Growth</h2>
+      <div id="bubble-chart"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Candlestick Chart — Weekly Stock Price</h2>
+      <div id="ohlc-chart"></div>
+    </div>
+
+  </div>
+
+  <!-- Row 3: Meter Gauges -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <h2>Meter Gauges — System Health</h2>
+      <div id="gauge-row">
+        <div class="gauge-wrap">
+          <div id="gauge-cpu"></div>
+          <div class="gauge-label">CPU</div>
+        </div>
+        <div class="gauge-wrap">
+          <div id="gauge-mem"></div>
+          <div class="gauge-label">Memory</div>
+        </div>
+        <div class="gauge-wrap">
+          <div id="gauge-disk"></div>
+          <div class="gauge-label">Disk I/O</div>
+        </div>
+        <div class="gauge-wrap">
+          <div id="gauge-net"></div>
+          <div class="gauge-label">Network</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    jqPlot &mdash; modernized fork &mdash;
+    <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+  </footer>
+
+  <script>
+  $(document).ready(function () {
+
+    // ── Line chart with trendline ──────────────────────────────────────────────
+    var s1 = [142, 168, 155, 189, 204, 198, 225, 247, 231, 268, 289, 312];
+    var s2 = [98,  112, 108, 127, 135, 142, 158, 163, 171, 189, 201, 215];
+    var months = ['Jan','Feb','Mar','Apr','May','Jun',
+                  'Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    $.jqplot('line-chart', [s1, s2], {
+      series: [
+        { label: 'Product A', trendline: { show: true, color: '#c0392b', lineWidth: 1.5 } },
+        { label: 'Product B', trendline: { show: true, color: '#2980b9', lineWidth: 1.5 } }
+      ],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: {
+          ticks:       months,
+          tickOptions: { angle: -30 }
+        },
+        yaxis: {
+          label:        'Units Sold',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min:          80,
+          tickOptions:  { formatString: '%d' }
+        }
+      },
+      highlighter: { show: true, sizeAdjust: 7.5 },
+      cursor:      { show: false },
+      grid:        { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+    // ── Bubble chart ───────────────────────────────────────────────────────────
+    // [x, y, radius, label]  x=market share%, y=YoY growth%, radius=revenue $M
+    var bubbles = [
+      [32, 18, 1400, 'AlphaCorp'],
+      [18, 31, 980,  'BetaTech'],
+      [9,  42, 520,  'GammaSoft'],
+      [24, 8,  1100, 'DeltaCo'],
+      [14, 25, 760,  'EpsilonAI'],
+      [6,  55, 310,  'ZetaCloud'],
+      [41, 12, 1850, 'EtaEnergy']
+    ];
+
+    $.jqplot('bubble-chart', [bubbles], {
+      seriesDefaults: {
+        renderer: $.jqplot.BubbleRenderer,
+        rendererOptions: {
+          bubbleGradients: true,
+          showLabels:      true,
+          bubbleAlpha:     0.85
+        },
+        shadow: true
+      },
+      axes: {
+        xaxis: {
+          label:         'Market Share (%)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min: 0, max: 50,
+          tickOptions:   { formatString: '%d%%' }
+        },
+        yaxis: {
+          label:         'YoY Growth (%)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min: 0, max: 65,
+          tickOptions:   { formatString: '%d%%' }
+        }
+      },
+      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+    // ── Candlestick chart ──────────────────────────────────────────────────────
+    // [date, open, high, low, close]
+    var ohlc = [
+      ['03/02/2009', 88.12, 92.77, 82.33, 85.30],
+      ['03/09/2009', 84.18, 97.20, 82.57, 95.93],
+      ['03/16/2009', 96.53, 103.48, 94.18, 101.59],
+      ['03/23/2009', 102.71, 109.98, 101.75, 106.85],
+      ['03/30/2009', 104.51, 116.13, 102.61, 115.99],
+      ['04/06/2009', 114.94, 120.00, 113.28, 119.57],
+      ['04/13/2009', 120.01, 124.25, 115.76, 123.42],
+      ['04/20/2009', 121.73, 127.20, 118.60, 123.90],
+      ['04/27/2009', 122.90, 127.95, 122.66, 127.24],
+      ['05/04/2009', 128.24, 133.50, 126.26, 129.19],
+      ['05/11/2009', 127.37, 130.96, 119.38, 122.42],
+      ['05/18/2009', 123.73, 129.31, 121.57, 122.50]
+    ];
+
+    $.jqplot('ohlc-chart', [ohlc], {
+      seriesDefaults: { yaxis: 'y2axis' },
+      series: [{ renderer: $.jqplot.OHLCRenderer, rendererOptions: { candleStick: true } }],
+      axes: {
+        xaxis: {
+          renderer:    $.jqplot.DateAxisRenderer,
+          tickOptions: { formatString: '%b %e' },
+          min:         '03/01/2009',
+          max:         '05/25/2009',
+          tickInterval:'3 weeks'
+        },
+        y2axis: {
+          tickOptions: { formatString: '$%.0f' },
+          label:         'Price (USD)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+        }
+      },
+      highlighter: {
+        show:         true,
+        showMarker:   false,
+        tooltipAxes:  'xy',
+        yvalues:      4,
+        formatString: '<table class="jqplot-highlighter">' +
+          '<tr><td>Date:</td><td>%s</td></tr>' +
+          '<tr><td>Open:</td><td>$%s</td></tr>' +
+          '<tr><td>High:</td><td>$%s</td></tr>' +
+          '<tr><td>Low:</td><td>$%s</td></tr>' +
+          '<tr><td>Close:</td><td>$%s</td></tr></table>'
+      },
+      grid: { shadow: false, background: '#fff', borderColor: '#e0e0e0' }
+    });
+
+    // ── Meter gauges ───────────────────────────────────────────────────────────
+    var gaugeOpts = function(val, color) {
+      return {
+        seriesDefaults: {
+          renderer: $.jqplot.MeterGaugeRenderer,
+          rendererOptions: {
+            min:           0,
+            max:           100,
+            intervals:     [33, 66, 100],
+            intervalColors: ['#4caf50', '#ff9800', '#f44336'],
+            showTickLabels: false,
+            label:         val + '%',
+            labelPosition: 'bottom',
+            needleThickness: 4,
+            hubRadius:     6
+          }
+        },
+        grid: { shadow: false, background: '#fff', borderColor: 'transparent',
+                gridLineColor: 'transparent' }
+      };
+    };
+
+    $.jqplot('gauge-cpu',  [[72]], gaugeOpts(72));
+    $.jqplot('gauge-mem',  [[58]], gaugeOpts(58));
+    $.jqplot('gauge-disk', [[89]], gaugeOpts(89));
+    $.jqplot('gauge-net',  [[34]], gaugeOpts(34));
+
+  });
+  </script>
+
+</body>
+</html>
