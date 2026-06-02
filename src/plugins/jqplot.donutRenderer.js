@@ -296,26 +296,31 @@
         }
         
         function doDraw () {
-            // Fix for IE and Chrome that can't seem to draw circles correctly.
+            // Use local copies to prevent mutation of closure variables
+            // across multiple doDraw() calls (shadow depth iterations + real draw).
+            // Mutating ang1/ang2 directly caused the real draw pass to see
+            // corrupted angles and skip drawing entirely.
+            var a1 = ang1, a2 = ang2;
             // ang2 should always be <= 2 pi since that is the way the data is converted.
-             if (ang2 > 6.282 + self.startAngle) {
-                ang2 = 6.282 + self.startAngle;
-                if (ang1 > ang2) {
-                    ang1 = 6.281 + self.startAngle;
+            // Note: startAngle is in degrees; convert to radians for comparison.
+            var saRad = self.startAngle / 180 * Math.PI;
+            if (a2 > 6.282 + saRad) {
+                a2 = 6.282 + saRad;
+                if (a1 > a2) {
+                    a1 = 6.281 + saRad;
                 }
             }
-            // Fix for IE, where it can't seem to handle 0 degree angles.  Also avoids
-            // ugly line on unfilled donuts.
-            if (ang1 >= ang2) {
+            // Avoid 0 degree angles and ugly line on unfilled donuts.
+            if (a1 >= a2) {
                 return;
             }
             ctx.beginPath();  
             ctx.fillStyle = color;
             ctx.strokeStyle = color;
             // ctx.lineWidth = lineWidth;
-            ctx.arc(0, 0, r, ang1, ang2, false);
-            ctx.lineTo(ri*Math.cos(ang2), ri*Math.sin(ang2));
-            ctx.arc(0,0, ri, ang2, ang1, true);
+            ctx.arc(0, 0, r, a1, a2, false);
+            ctx.lineTo(ri*Math.cos(a2), ri*Math.sin(a2));
+            ctx.arc(0, 0, ri, a2, a1, true);
             ctx.closePath();
             if (fill) {
                 ctx.fill();
