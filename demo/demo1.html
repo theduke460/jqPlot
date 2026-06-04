@@ -81,9 +81,50 @@
       font-size: 0.8rem;
       text-align: center;
     }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      color: #2980b9;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .back-link::before { content: "\2190  "; }
+
+    /* Pie slice labels — white bold with black outline for anti-aliased legibility */
+    .jqplot-pie-series.jqplot-data-label {
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px  1px 0 #000,
+                  -1px -1px 0 #000,
+                   1px -1px 0 #000,
+                  -1px  1px 0 #000;
+    }
+
+    /* Donut slice labels — same treatment */
+    .jqplot-donut-series.jqplot-data-label {
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px  1px 0 #000,
+                  -1px -1px 0 #000,
+                   1px -1px 0 #000,
+                  -1px  1px 0 #000;
+    }
+
+    /* Donut center total — jqplot-data-label without a series class.
+       Renderer now correctly offsets by canvas._offsets and subtracts
+       half the element dimensions, so no CSS transform needed here. */
+    .jqplot-data-label:not(.jqplot-pie-series):not(.jqplot-donut-series) {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #2c3e50;
+    }
   </style>
 </head>
 <body>
+
+  <a class="back-link" href="index.html">Demo Index</a>
 
   <h1>jqPlot Demo</h1>
   <p class="subtitle">Modernized build — jQuery 3.7 · IE legacy code removed · esbuild pipeline</p>

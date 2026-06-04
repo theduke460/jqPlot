@@ -78,9 +78,21 @@
       font-size: 0.8rem;
       text-align: center;
     }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      color: #2980b9;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .back-link::before { content: "\2190  "; }
   </style>
 </head>
 <body>
+
+  <a class="back-link" href="index.html">Demo Index</a>
 
   <h1>jqPlot Demo 2</h1>
   <p class="subtitle">Line · Bubble · Candlestick · Meter Gauges</p>

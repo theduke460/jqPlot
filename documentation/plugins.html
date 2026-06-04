@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaction Plugins — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Interaction Plugins</h1>
+<p class="page-subtitle">Highlighter, Cursor, Canvas Overlay, Draggable, and Point Labels.</p>
+
+<div class="note">
+  <strong>One plugin per mouse-event stream:</strong> The <code>highlighter</code> and
+  <code>cursor</code> plugins both bind to <code>mousemove</code> on the event canvas
+  and compete for the same events. Enable only one per chart.
+  Set <code>{ show: false }</code> on whichever you are not using.
+</div>
+
+<h2>Highlighter — Hover Tooltips</h2>
+<div class="card">
+  <p>
+    Shows a floating tooltip when the mouse is near a data point marker.
+    <code>sizeAdjust</code> enlarges the invisible hit zone around each marker.
+    <code>tooltipAxes</code> controls which axis values appear in the tooltip.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.highlighter.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [data], {
+  highlighter: {
+    show:               true,
+    sizeAdjust:         7.5,
+    tooltipAxes:        'both',     // 'x' | 'y' | 'both'
+    bringSeriesToFront: true,
+    formatString:       '&lt;strong&gt;x=%s  y=%s&lt;/strong&gt;'
+  },
+  cursor: { show: false }
+});</code></pre>
+
+  <h3>formatString Tokens</h3>
+  <p>
+    The format string uses <code>%s</code> placeholders. With <code>tooltipAxes: 'both'</code>
+    the first <code>%s</code> is the x value and the second is the y value.
+    With <code>tooltipAxes: 'y'</code> only one <code>%s</code> is needed.
+  </p>
+  <pre><code>// Show only y value:
+formatString: '&lt;strong&gt;%s M users&lt;/strong&gt;'
+
+// Show both with labels:
+formatString: 'Sample %s → %s ms'
+
+// Date axis — x value will be a formatted date string:
+formatString: '&lt;strong&gt;%s &amp;nbsp; $%s M&lt;/strong&gt;'</code></pre>
+  <a class="demo-link" href="../demo/demo6.html">See demo6 →</a>
+</div>
+
+<h2>Cursor — Crosshair with Coordinate Readout</h2>
+<div class="card">
+  <p>
+    Draws a crosshair at the mouse position with a live coordinate readout.
+    <code>useAxesFormatters: true</code> delegates number formatting to each axis's
+    own tick formatter — this is the correct way to get properly-scaled values
+    in the tooltip.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.cursor.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [data], {
+  cursor: {
+    show:                    true,
+    showTooltip:             true,
+    followMouse:             true,
+    showVerticalLine:        true,
+    showHorizontalLine:      true,
+    // Delegate formatting to each axis's tick formatter — avoids unit mismatch:
+    useAxesFormatters:       true,
+    showTooltipUnitPosition: true,
+    showTooltipGridPosition: false,
+    style:                   'crosshair'
+  },
+  highlighter: { show: false }
+});</code></pre>
+
+  <div class="warn">
+    <strong>Tooltip value mismatch:</strong> Using <code>tooltipFormatString</code> with
+    custom printf tokens (<code>%.1f%%</code>) applies the format to raw internal
+    coordinate values, not to axis-scaled values. Always use
+    <code>useAxesFormatters: true</code> to get the same values shown on the axis ticks.
+  </div>
+
+  <h3>Y-Axis Autoscaling with Cursor</h3>
+  <p>
+    When using the cursor plugin, avoid hardcoding <code>min</code>/<code>max</code>
+    on the y-axis. If data can exceed those bounds the series clips silently:
+  </p>
+  <pre><code>yaxis: {
+  // No min/max — autoscale
+  padMin: 1.03,
+  padMax: 1.03,
+  tickOptions: { formatString: '%d%%' }
+}</code></pre>
+  <a class="demo-link" href="../demo/demo6.html">See demo6 →</a>
+</div>
+
+<h2>Canvas Overlay — Arbitrary Lines and Regions</h2>
+<div class="card">
+  <p>
+    Draws reference lines and regions on top of any chart after it renders.
+    All coordinates are in <strong>data units</strong> (same scale as the axes),
+    not pixels. The plugin converts them internally via <code>series_u2p()</code>.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.canvasOverlay.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [data], {
+  canvasOverlay: {
+    show: true,
+    objects: [
+      // Solid horizontal line at y=145
+      { horizontalLine: {
+          name:     'buy-zone',
+          y:         145,
+          lineWidth: 2,
+          color:    '#27ae60',
+          shadow:    false
+      }},
+      // Solid horizontal line at y=180
+      { horizontalLine: {
+          name:     'sell-zone',
+          y:         180,
+          lineWidth: 2,
+          color:    '#e74c3c',
+          shadow:    false
+      }},
+      // Dashed horizontal line
+      { dashedHorizontalLine: {
+          name:        'target',
+          y:            195,
+          lineWidth:    2,
+          color:       '#e67e22',
+          dashPattern: [8, 5],
+          shadow:       false
+      }}
+    ]
+  }
+});</code></pre>
+
+  <h3>Available Object Types</h3>
+  <table>
+    <tr><th>Type</th><th>Required options</th></tr>
+    <tr><td><code>horizontalLine</code></td><td><code>y</code> — data-unit y value</td></tr>
+    <tr><td><code>dashedHorizontalLine</code></td><td><code>y</code>, <code>dashPattern: [dashLen, gapLen]</code></td></tr>
+    <tr><td><code>verticalLine</code></td><td><code>x</code> — data-unit x value</td></tr>
+    <tr><td><code>dashedVerticalLine</code></td><td><code>x</code>, <code>dashPattern</code></td></tr>
+    <tr><td><code>line</code></td><td><code>start: [x1,y1]</code>, <code>stop: [x2,y2]</code></td></tr>
+  </table>
+  <a class="demo-link" href="../demo/demo6.html">See demo6 →</a>
+</div>
+
+<h2>Draggable — Interactive Data Editing</h2>
+<div class="card">
+  <p>
+    Makes individual series markers draggable. Opt in per series with
+    <code>isDraggable: true</code>. The <code>jqplotDataChange</code> event fires
+    continuously during a drag with the updated <code>[x, y]</code> value.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.draggable.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [sensorData], {
+  series: [{
+    isDraggable: true,          // opt-in — note: two g's
+    markerOptions: { size: 10, style: 'filledCircle' }
+  }],
+  draggable: {
+    show:        true,
+    constrainTo: 'y'            // 'x' | 'y' | 'none'
+  }
+});
+
+// Handle drag events:
+$('#chart').on('jqplotDataChange', function(evt, seriesIdx, pointIdx, data) {
+  console.log('Series', seriesIdx, 'Point', pointIdx, '→', data);
+
+  // Optional: debounced Ajax save
+  clearTimeout(window._dragTimer);
+  window._dragTimer = setTimeout(function() {
+    $.ajax({
+      url:  '/api/update',
+      method: 'POST',
+      data: JSON.stringify({ series: seriesIdx, point: pointIdx,
+                             x: data[0], y: data[1] })
+    });
+  }, 300);
+});</code></pre>
+
+  <div class="warn">
+    The property name is <code>isDraggable</code> (two g's). The plugin file is named
+    <code>jqplot.draggable.js</code>. An older misspelled variant <code>jqplot.dragable.js</code>
+    also exists in the dist; loading it and using <code>isDragable</code> (one g) will not work
+    with the canonical plugin.
+  </div>
+
+  <h3>Use Cases for Draggable Data</h3>
+  <p>The plugin updates the series <code>.data</code> array in-place. Useful for:</p>
+  <ul>
+    <li><strong>Forecast adjustment</strong> — analysts drag projected values to apply manual overrides</li>
+    <li><strong>Threshold setting</strong> — operations teams drag SLA limits to new values</li>
+    <li><strong>Capacity planning</strong> — managers drag staffing levels; server recalculates costs</li>
+    <li><strong>Sensor calibration</strong> — technicians drag reference points to correct instrument drift</li>
+  </ul>
+  <a class="demo-link" href="../demo/demo6.html">See demo6 →</a>
+</div>
+
+<h2>Point Labels</h2>
+<div class="card">
+  <p>
+    Annotates each data point marker with a formatted value label. Works with
+    line, bar, and scatter charts.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.pointLabels.min.js"&gt;&lt;/script&gt;
+
+seriesDefaults: {
+  pointLabels: {
+    show:         true,
+    location:     'n',          // 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' etc.
+    ypadding:     5,            // gap between marker and label
+    formatString: '%.1fM'       // sprintf format for the value
+  }
+}</code></pre>
+
+  <h3>HTML Labels with Custom Styling</h3>
+  <p>
+    Set <code>escapeHTML: false</code> and provide an explicit <code>labels</code> array
+    of HTML strings to apply custom styles — useful for white text with black outlines
+    inside colored bars:
+  </p>
+  <pre><code>pointLabels: {
+  show:          true,
+  location:      'n',
+  escapeHTML:    false,
+  edgeTolerance: -100,          // prevent suppression on short bars
+  labels: data.map(function(v) {
+    return '&lt;span style="font-weight:bold;color:#fff;' +
+      'text-shadow:1px 1px 0 #000,-1px -1px 0 #000"&gt;' + v + '&lt;/span&gt;';
+  })
+}</code></pre>
+  <a class="demo-link" href="../demo/demo4.html">See demo4 →</a>
+  <a class="demo-link" href="../demo/demo5.html" style="margin-left:.5rem">See demo5 →</a>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

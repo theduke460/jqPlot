@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pie &amp; Donut Charts — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Pie &amp; Donut Charts</h1>
+<p class="page-subtitle">Circular charts with slice labels, configurable start angles, and donut center totals.</p>
+
+<h2>Required Plugins</h2>
+<div class="card">
+  <pre><code>&lt;script src="dist/plugins/jqplot.pieRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.donutRenderer.min.js"&gt;&lt;/script&gt;</code></pre>
+</div>
+
+<h2>Pie Chart</h2>
+<div class="card">
+  <p>
+    Data is a single array of <code>[label, value]</code> pairs. Slices are sized
+    proportionally to their values. <code>startAngle: -90</code> starts the first slice
+    at 12 o'clock.
+  </p>
+  <pre><code>var slices = [
+  ['Flights',  42],
+  ['Hotels',   28],
+  ['Car Hire', 18],
+  ['Other',    12]
+];
+
+$.jqplot('pie-chart', [slices], {
+  seriesDefaults: {
+    renderer: $.jqplot.PieRenderer,
+    rendererOptions: {
+      showDataLabels:    true,
+      dataLabels:        'value',    // 'value' | 'percent' | 'label'
+      startAngle:        -90,
+      sliceMargin:       4,
+      shadow:            true,
+      shadowOffset:      2
+    }
+  },
+  legend: {
+    show:             true,
+    location:         'e',
+    rendererOptions:  { numberColumns: 1 }
+  }
+});</code></pre>
+
+  <h3>Slice Label Styling</h3>
+  <p>
+    Slice labels are injected as DOM <code>&lt;span&gt;</code> elements with class
+    <code>jqplot-pie-series jqplot-data-label</code>. Style them with CSS:
+  </p>
+  <pre><code>.jqplot-pie-series.jqplot-data-label {
+  font-weight: bold;
+  color: #fff;
+  text-shadow:  1px  1px 0 #000,
+               -1px -1px 0 #000,
+                1px -1px 0 #000,
+               -1px  1px 0 #000;
+}</code></pre>
+  <a class="demo-link" href="../demo/demo1.html">See demo1 →</a>
+</div>
+
+<h2>Donut Chart</h2>
+<div class="card">
+  <p>
+    Same data format as pie. <code>DonutRenderer</code> adds a hole in the centre.
+    <code>innerRadius</code> controls hole size as a percentage of the outer radius.
+    Set <code>totalLabel: true</code> to display the sum in the centre.
+  </p>
+  <pre><code>$.jqplot('donut-chart', [slices], {
+  seriesDefaults: {
+    renderer: $.jqplot.DonutRenderer,
+    rendererOptions: {
+      innerRadius:       55,       // % of outer radius (controls hole size)
+      startAngle:        -90,
+      sliceMargin:       3,
+      showDataLabels:    true,
+      dataLabels:        'value',
+      totalLabel:        true      // show sum in centre hole
+    }
+  }
+});</code></pre>
+
+  <h3>Centre Total Label Styling</h3>
+  <p>
+    The centre total is a <code>&lt;div&gt;</code> with class <code>jqplot-data-label</code>
+    but <em>without</em> the series class — target it with a <code>:not()</code> selector:
+  </p>
+  <pre><code>.jqplot-donut-series.jqplot-data-label {
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000,
+               1px -1px 0 #000, -1px  1px 0 #000;
+}
+
+/* Centre total only */
+.jqplot-data-label:not(.jqplot-pie-series):not(.jqplot-donut-series) {
+  font-weight: bold;
+  font-size:   1.1rem;
+  color:       #2c3e50;
+}</code></pre>
+
+  <div class="note">
+    The centre total label positioning is handled by the renderer — it adds
+    <code>canvas._offsets</code> and subtracts half the element dimensions to
+    centre it correctly. Do not add <code>transform: translate(-50%, -50%)</code>
+    in CSS or the label will be double-offset.
+  </div>
+  <a class="demo-link" href="../demo/demo1.html">See demo1 →</a>
+</div>
+
+<h2>Three Compounding Bugs Fixed in This Fork</h2>
+<div class="card">
+  <p>
+    The original jqPlot donut renderer had three interacting bugs in <code>drawSlice()</code>
+    that caused invisible rings. All three are fixed in this fork:
+  </p>
+  <table>
+    <tr><th>Bug</th><th>Symptom</th><th>Fix</th></tr>
+    <tr>
+      <td>Lost <code>this</code> context</td>
+      <td><code>this.startAngle</code> resolved to <code>window.startAngle</code> (undefined) inside nested <code>doDraw()</code></td>
+      <td>Capture <code>var self = this</code> before entering <code>doDraw()</code></td>
+    </tr>
+    <tr>
+      <td>Unit mismatch</td>
+      <td>Angle clamp compared radians against <code>startAngle</code> stored in degrees, collapsing all arcs</td>
+      <td>Convert to radians: <code>var saRad = self.startAngle / 180 * Math.PI</code></td>
+    </tr>
+    <tr>
+      <td>Closure mutation</td>
+      <td>Shadow loop called <code>doDraw()</code> multiple times, corrupting shared <code>ang1</code>/<code>ang2</code></td>
+      <td>Use local copies: <code>var a1 = ang1, a2 = ang2</code> inside <code>doDraw()</code></td>
+    </tr>
+  </table>
+  <div class="tip">
+    Fixing Bug 1 without fixing Bug 2 made things <em>worse</em> — the clamp started
+    firing with the correct object but the wrong units. All three required coordinated fixes.
+  </div>
+</div>
+
+<h2>PieRenderer Options Reference</h2>
+<div class="card">
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>startAngle</code></td><td>Number</td><td>0</td><td>Degrees. -90 = 12 o'clock start</td></tr>
+    <tr><td><code>sliceMargin</code></td><td>Number</td><td>0</td><td>Gap between slices in pixels</td></tr>
+    <tr><td><code>fill</code></td><td>Boolean</td><td>true</td><td>Fill slices (false = outline only)</td></tr>
+    <tr><td><code>showDataLabels</code></td><td>Boolean</td><td>false</td><td>Show labels on slices</td></tr>
+    <tr><td><code>dataLabels</code></td><td>String</td><td><code>'percent'</code></td><td><code>'percent'</code>, <code>'value'</code>, or <code>'label'</code></td></tr>
+    <tr><td><code>dataLabelFormatString</code></td><td>String</td><td>null</td><td>sprintf format for label values</td></tr>
+    <tr><td><code>dataLabelPositionFactor</code></td><td>Number</td><td>0.52</td><td>Label distance from centre (0–1)</td></tr>
+  </table>
+</div>
+
+<h2>DonutRenderer Additional Options</h2>
+<div class="card">
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>innerRadius</code></td><td>Number</td><td>null</td><td>Hole size as % of outer radius</td></tr>
+    <tr><td><code>totalLabel</code></td><td>Boolean/String</td><td>false</td><td><code>true</code> shows numeric sum; pass a string to display custom text</td></tr>
+    <tr><td><code>ringMargin</code></td><td>Number</td><td>0</td><td>Gap between concentric rings (multi-series)</td></tr>
+  </table>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

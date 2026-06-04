@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Date Enhancement Plugin — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    .icon-demo{display:inline-flex;align-items:center;gap:.5rem;margin:.3rem .8rem .3rem 0}
+    .icon-circle{width:14px;height:14px;border-radius:50%;display:inline-block}
+    .icon-diamond{width:12px;height:12px;transform:rotate(45deg);display:inline-block}
+  </style>
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Date Enhancement Plugin</h1>
+<p class="page-subtitle">
+  <code>jqplot.dateEnhancement.js</code> — shaded date/value ranges and annotated
+  point events on any jqPlot chart.
+</p>
+
+<div class="note">
+  This plugin works on <strong>any</strong> jqPlot chart — not just date-axis charts.
+  Pass date strings for <code>DateAxisRenderer</code> axes; pass numeric x-values
+  for linear axes.
+</div>
+
+<h2>Loading</h2>
+<div class="card">
+  <pre><code>&lt;!-- Load after dateAxisRenderer if using date axes --&gt;
+&lt;script src="dist/plugins/jqplot.dateAxisRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.dateEnhancement.min.js"&gt;&lt;/script&gt;</code></pre>
+  <p>
+    The plugin self-registers via <code>$.jqplot.preParseOptionsHooks</code> and
+    <code>$.jqplot.postDrawHooks</code>. No explicit activation call is needed.
+    It activates automatically when <code>dateRanges</code> or <code>dateEvents</code>
+    keys are present in the chart options object.
+  </p>
+</div>
+
+<h2>Icon Convention</h2>
+<div class="card">
+  <p>The icon shape carries semantic meaning and is enforced programmatically:</p>
+  <p>
+    <span class="icon-demo">
+      <span class="icon-circle" style="background:#e74c3c"></span>
+      <strong>Circle</strong> — point-in-time event (<code>dateEvents</code>)
+    </span>
+    <span class="icon-demo">
+      <span class="icon-diamond" style="background:#2980b9"></span>
+      <strong>Diamond</strong> — collapsed narrow range (auto-converted from <code>dateRanges</code>)
+    </span>
+  </p>
+  <p>
+    Callers cannot override the shape. This ensures the visual language is consistent
+    across all charts that use the plugin.
+  </p>
+</div>
+
+<h2>dateRanges — Shaded Regions</h2>
+<div class="card">
+  <p>
+    Each entry in the <code>dateRanges</code> array draws a semi-transparent shaded
+    rectangle spanning the x range and the full grid height.
+  </p>
+
+  <h3>Wide ranges (≥ 100px)</h3>
+  <p>Drawn as a shaded rectangle with an inline label at the top-left corner.</p>
+
+  <h3>Narrow ranges (&lt; 100px)</h3>
+  <p>
+    Automatically converted to a <strong>diamond event marker</strong> positioned at
+    the range midpoint. The label is built programmatically as:<br>
+    <code>"&lt;name&gt;\n&lt;startDate&gt; – &lt;endDate&gt;"</code><br>
+    This eliminates cramped or overflowing labels without any data changes.
+    The threshold is configurable via <code>dateNarrowThreshold</code>.
+  </p>
+
+  <h3>Example</h3>
+  <pre><code>$.jqplot('chart', [data], {
+  axes: {
+    xaxis: { renderer: $.jqplot.DateAxisRenderer, /* ... */ }
+  },
+
+  dateRanges: [
+    // Wide range — will show shaded rectangle + inline label
+    { start:      '1939-09-01',
+      end:        '1945-09-02',
+      color:      '#27ae60',
+      opacity:     0.18,
+      label:      'WW2',
+      labelColor: '#1e8449',
+      labelSize:   11
+    },
+    // Narrow range — will auto-collapse to a diamond event
+    { start:      '1960-04-01',
+      end:        '1961-02-01',
+      color:      '#2980b9',
+      opacity:     0.20,
+      label:      'Recession',
+      labelColor: '#1a5276',
+      labelSize:   9
+    }
+  ]
+});</code></pre>
+
+  <h3>dateRanges Entry Options</h3>
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>start</code></td><td>String/Number</td><td>required</td><td>Range start. Date string for date axes; number for numeric axes.</td></tr>
+    <tr><td><code>end</code></td><td>String/Number</td><td>required</td><td>Range end.</td></tr>
+    <tr><td><code>color</code></td><td>String</td><td><code>'#3498db'</code></td><td>CSS color for fill, edge lines, and label text.</td></tr>
+    <tr><td><code>opacity</code></td><td>Number</td><td>0.12</td><td>Fill opacity 0–1. Recommend 0.10–0.22 so underlying data stays visible.</td></tr>
+    <tr><td><code>label</code></td><td>String</td><td>''</td><td>Text for inline label (wide) or first line of collapsed event label (narrow).</td></tr>
+    <tr><td><code>labelColor</code></td><td>String</td><td>same as <code>color</code></td><td>Override label text color.</td></tr>
+    <tr><td><code>labelSize</code></td><td>Number</td><td>12</td><td>Font size in pixels.</td></tr>
+  </table>
+</div>
+
+<h2>dateEvents — Point Annotations</h2>
+<div class="card">
+  <p>
+    Each entry draws a circle marker at the given x-axis value.  Y positions are
+    spread programmatically across a configurable band using stratified placement —
+    events are distributed into equal slots across the band, with seeded random
+    jitter within each slot for a natural look without collision.
+  </p>
+  <p>
+    Positions are stable within a session (same seed = same position on redraws)
+    but vary between page loads because a page-load timestamp is mixed into every
+    seed at plugin load time.
+  </p>
+
+  <h3>Example</h3>
+  <pre><code>dateEvents: [
+  { date:      '1969-07-20',
+    label:     'Apollo 11 Moon Landing\nJul 20, 1969',
+    color:     '#2c3e50',
+    size:       9,
+    labelSize:  10
+  },
+  { date:      '1986-01-28',
+    label:     'Challenger Disaster\nJan 28, 1986',
+    color:     '#e74c3c',
+    size:       7,
+    labelSize:  10
+  }
+]</code></pre>
+
+  <h3>Two-Line Labels</h3>
+  <p>
+    Use <code>\n</code> in the label string to split it across two lines.
+    The plugin renders labels with <code>white-space: pre-line</code> so the
+    line break is honoured. Both lines share the same color and background.
+  </p>
+  <pre><code>// Single-line:
+label: 'Apollo 11 Moon Landing'
+
+// Two-line (title + date):
+label: 'Apollo 11 Moon Landing\nJul 20, 1969'</code></pre>
+
+  <div class="warn">
+    In JavaScript source, <code>\n</code> must be written as two characters
+    (backslash + n) inside a string literal. A literal newline character
+    inside a single-quoted string is a <strong>syntax error</strong>.
+  </div>
+
+  <h3>Numeric Axis Usage</h3>
+  <p>
+    Use the <code>x</code> key instead of <code>date</code> for numeric axes:
+  </p>
+  <pre><code>// On a chart with a numeric x-axis (samples 1–10):
+dateEvents: [
+  { x: 4, label: 'Cache Miss Spike', color: '#e74c3c', size: 7 },
+  { x: 8, label: 'CDN Failover',     color: '#8e44ad', size: 7 }
+]</code></pre>
+
+  <h3>dateEvents Entry Options</h3>
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>date</code></td><td>String</td><td>required*</td><td>Date string for date-axis charts.</td></tr>
+    <tr><td><code>x</code></td><td>Number</td><td>required*</td><td>Numeric x value for non-date-axis charts. Alias for <code>date</code>.</td></tr>
+    <tr><td><code>label</code></td><td>String</td><td>''</td><td>Annotation text. Supports <code>\n</code> for two lines.</td></tr>
+    <tr><td><code>color</code></td><td>String</td><td><code>'#e74c3c'</code></td><td>Circle marker and label text color.</td></tr>
+    <tr><td><code>size</code></td><td>Number</td><td>7</td><td>Circle radius in pixels.</td></tr>
+    <tr><td><code>seed</code></td><td>Number</td><td>auto</td><td>Optional integer seed for reproducible Y scatter. If omitted, derived from label text + index + page-load timestamp.</td></tr>
+    <tr><td><code>labelSize</code></td><td>Number</td><td>10</td><td>Font size in pixels.</td></tr>
+  </table>
+  <p style="font-size:.85rem;color:#888">* Use <code>date</code> for date axes, <code>x</code> for numeric axes. One is required.</p>
+</div>
+
+<h2>Hover Tooltips</h2>
+<div class="card">
+  <p>
+    All markers — both point-event circles and collapsed-range diamonds — show a
+    floating tooltip on mouse hover. The tooltip displays the full label text, including
+    both lines of two-line labels. It is color-coded with a left border matching the
+    marker color.
+  </p>
+  <p>
+    The tooltip is implemented as a single shared <code>&lt;div&gt;</code> managed by
+    the plugin. A <code>mousemove</code> handler on the jqPlot event canvas tests the
+    cursor's proximity to each recorded marker position (within <code>markerSize + 4</code> px).
+    The cursor changes to a <code>pointer</code> when over a hit zone.
+  </p>
+  <p>No configuration is required — hover tooltips are always active when the plugin is loaded.</p>
+</div>
+
+<h2>Plot-Level Options</h2>
+<div class="card">
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>dateRanges</code></td><td>Array</td><td>[]</td><td>Array of range entry objects.</td></tr>
+    <tr><td><code>dateEvents</code></td><td>Array</td><td>[]</td><td>Array of event entry objects.</td></tr>
+    <tr><td><code>dateNarrowThreshold</code></td><td>Number</td><td>100</td><td>Pixel width below which ranges collapse to diamond events.</td></tr>
+    <tr><td><code>dateEnhancementMargin</code></td><td>Number</td><td>0</td><td>Extra pixels added to <code>gridPadding.top</code> before layout. Use when you need extra space above the grid for inline range labels.</td></tr>
+    <tr><td><code>dateScatterTop</code></td><td>Number</td><td>0.15</td><td>Event scatter band upper boundary as a fraction of grid height from the top. 0.15 = 15% down from the grid top.</td></tr>
+    <tr><td><code>dateScatterBottom</code></td><td>Number</td><td>0.85</td><td>Event scatter band lower boundary. 0.85 = 85% down from the grid top, leaving a margin above the x-axis.</td></tr>
+  </table>
+</div>
+
+<h2>Y Scatter — How It Works</h2>
+<div class="card">
+  <p>
+    Event Y positions use <strong>stratified placement</strong>: the scatter band is
+    divided into N equal slots (one per event, including collapsed-range events).
+    Each event is assigned to its slot by <code>index % N</code>, then a seeded
+    pseudo-random value provides jitter within the slot. This guarantees visual
+    spread regardless of how many events there are or what their labels say.
+  </p>
+  <pre><code>function stratifiedY(index, total, bandTop, bandBottom, seed) {
+  var slotH    = (bandBottom - bandTop) / total;
+  var slotTop  = bandTop + (index % total) * slotH;
+  var jitter   = seededRandom(seed) * slotH * 0.7;
+  return slotTop + slotH * 0.15 + jitter;
+}</code></pre>
+  <p>
+    Seeds are derived from <code>labelSeed(label) + eventIndex + PAGE_LOAD_SEED</code>.
+    The <code>PAGE_LOAD_SEED</code> is <code>Math.floor(Date.now() / 1000) & 0xFFFF</code>,
+    evaluated once when the plugin script loads. This means:
+  </p>
+  <ul>
+    <li>Positions are <strong>stable within a session</strong> — redraws don't move markers</li>
+    <li>Positions <strong>vary between page loads</strong> — each load gets a different scatter</li>
+    <li>Callers can override with an explicit <code>seed</code> for fully reproducible placement</li>
+  </ul>
+</div>
+
+<h2>Implementation Notes</h2>
+<div class="card">
+  <h3>How the plugin hooks in</h3>
+  <pre><code>// preParseOptionsHooks: adjust gridPadding.top before layout is calculated.
+// Signature: fn.call(plotObj, options) — one argument only.
+$.jqplot.preParseOptionsHooks.push($.jqplot.DateEnhancement.preParseOptions);
+
+// postDrawHooks: draw overlays after all canvas drawing is complete.
+// Signature: fn.call(plotObj) — no arguments, use 'this'.
+$.jqplot.postDrawHooks.push($.jqplot.DateEnhancement.postPlotDraw);</code></pre>
+
+  <div class="warn">
+    <strong>Hook signature pitfall:</strong> <code>preParseOptionsHooks</code> passes
+    only <code>(options)</code> to the handler, not <code>(target, data, options)</code>.
+    Declaring extra parameters causes <code>options</code> to receive the wrong value,
+    which crashes initialization for all charts on the page.
+  </div>
+
+  <h3>Coordinate conversion</h3>
+  <pre><code>// Inside postPlotDraw — convert x-axis value to canvas pixel:
+function xPx(val) {
+  return plot._gridPadding.left + plot.axes.xaxis.series_u2p(resolveX(val, xaxis));
+}
+
+// resolveX: DateAxisRenderer axes need the value as a timestamp.
+// By postDraw time, axis.renderer is an INSTANCE — use instanceof:
+function resolveX(val, xaxis) {
+  if (xaxis.renderer instanceof $.jqplot.DateAxisRenderer) {
+    return new $.jsDate(val).getTime();
+  }
+  return Number(val);
+}</code></pre>
+
+  <h3>Label width measurement</h3>
+  <p>
+    To decide whether a range label fits inside its shaded region, the plugin inserts
+    a hidden clone of the label into the DOM, measures its rendered pixel width with
+    <code>outerWidth()</code>, then removes it. This is the only reliable method —
+    character-count estimates vary with font, size, and browser.
+  </p>
+  <pre><code>function measureLabel(text, fontSize, target) {
+  var $probe = $('&lt;div&gt;&lt;/div&gt;').text(text).css({
+    position: 'absolute', visibility: 'hidden',
+    whiteSpace: 'nowrap', fontSize: fontSize + 'px',
+    fontWeight: 'bold', padding: '2px 5px'
+  });
+  target.append($probe);
+  var w = $probe.outerWidth(true);
+  $probe.remove();
+  return w;
+}</code></pre>
+</div>
+
+<h2>Complete Example</h2>
+<div class="card">
+  <pre><code>&lt;script src="dist/plugins/jqplot.dateAxisRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.dateEnhancement.min.js"&gt;&lt;/script&gt;
+
+var revenueData = [
+  ['2015-01-01', 12.4], ['2016-01-01', 14.8],
+  ['2017-01-01', 17.1], ['2018-01-01', 15.6],
+  ['2019-01-01', 21.3], ['2020-01-01', 18.9],
+  ['2021-01-01', 24.7], ['2022-01-01', 28.2]
+];
+
+$.jqplot('timeline-chart', [revenueData], {
+  series: [{
+    label: 'Revenue ($M)', color: '#2980b9',
+    lineWidth: 2.5, fill: true, fillAlpha: 0.12,
+    markerOptions: { size: 7, style: 'filledCircle' }
+  }],
+  axes: {
+    xaxis: {
+      renderer:     $.jqplot.DateAxisRenderer,
+      tickInterval: '1 year',
+      tickOptions:  { formatString: '%Y', angle: -30 },
+      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+      label: 'Year'
+    },
+    yaxis: {
+      label: 'Revenue ($M)',
+      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+      min: 0, tickOptions: { formatString: '$%.0fM' }
+    }
+  },
+
+  dateRanges: [
+    { start: '2017-06-01', end: '2018-12-31',
+      color: '#e67e22', opacity: 0.13,
+      label: 'Trade Tensions', labelColor: '#d35400' },
+    { start: '2020-01-01', end: '2021-06-30',
+      color: '#e74c3c', opacity: 0.13,
+      label: 'COVID-19 Impact', labelColor: '#c0392b' }
+  ],
+
+  dateEvents: [
+    { date: '2016-03-15', label: 'Series B Funding\nMar 2016',
+      color: '#8e44ad', size: 7, labelSize: 10 },
+    { date: '2021-09-01', label: 'IPO\nSep 2021',
+      color: '#2c3e50', size: 9, labelSize: 11 }
+  ],
+
+  highlighter: { show: false },
+  cursor:      { show: false },
+  grid:        { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo6.html">See full demo6 example →</a>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

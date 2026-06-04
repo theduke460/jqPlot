@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bar Charts — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Bar Charts</h1>
+<p class="page-subtitle">Vertical bars, horizontal bars, grouped multi-series bars, and value labels.</p>
+
+<h2>Required Plugin</h2>
+<div class="card">
+  <p>All bar charts require <code>BarRenderer</code> and usually <code>CategoryAxisRenderer</code>:</p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.barRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.categoryAxisRenderer.min.js"&gt;&lt;/script&gt;</code></pre>
+</div>
+
+<h2>Vertical Bar Chart — Single Series</h2>
+<div class="card">
+  <p>
+    Set <code>seriesDefaults.renderer</code> to <code>$.jqplot.BarRenderer</code> and
+    the x-axis renderer to <code>$.jqplot.CategoryAxisRenderer</code>.
+    The <code>ticks</code> array provides category labels.
+  </p>
+  <pre><code>var sales  = [48, 63, 71, 55, 82, 76];
+var months = ['Jan','Feb','Mar','Apr','May','Jun'];
+
+$.jqplot('chart', [sales], {
+  seriesDefaults: {
+    renderer:        $.jqplot.BarRenderer,
+    rendererOptions: { fillToZero: true, barPadding: 4, barMargin: 10 }
+  },
+  series: [{ label: 'Sales ($k)', color: '#2980b9' }],
+  legend: { show: true, location: 'nw' },
+  axes: {
+    xaxis: {
+      renderer: $.jqplot.CategoryAxisRenderer,
+      ticks:    months
+    },
+    yaxis: {
+      label:         'Sales ($k)',
+      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+      min:  0,
+      tickOptions: { formatString: '$%dk' }
+    }
+  }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo1.html">See demo1 →</a>
+</div>
+
+<h2>Grouped Bar Chart — Multiple Series</h2>
+<div class="card">
+  <p>
+    Pass multiple series arrays. jqPlot automatically applies a <code>_barNudge</code> offset
+    to place bars side-by-side within each category. Use <code>barPadding</code> to control
+    the gap between bars in a group, and <code>barMargin</code> for the gap between groups.
+  </p>
+  <pre><code>var north  = [48, 63, 71, 55, 82, 76];
+var south  = [39, 51, 68, 44, 73, 61];
+var months = ['January','February','March','April','May','June'];
+
+$.jqplot('chart', [north, south], {
+  seriesDefaults: {
+    renderer:        $.jqplot.BarRenderer,
+    rendererOptions: { barPadding: 5, barMargin: 16 }
+  },
+  series: [
+    { label: 'North Region', color: '#2e86c1' },
+    { label: 'South Region', color: '#e59866' }
+  ],
+  legend: { show: true, location: 'nw' },
+  axes: {
+    xaxis: {
+      renderer: $.jqplot.CategoryAxisRenderer,
+      ticks:    months,
+      tickOptions: { angle: -20 }
+    },
+    yaxis: { min: 0, tickOptions: { formatString: '$%dk' } }
+  }
+});</code></pre>
+  <div class="warn">
+    <strong>_barNudge pitfall:</strong> Use one multi-point series (not N single-point series)
+    when you want one bar per category. Multiple single-point series causes jqPlot to treat
+    them as a grouped chart and apply nudge offsets that push bars off-canvas.
+    See <a href="index.html">Technical Notes Issue 5</a>.
+  </div>
+  <a class="demo-link" href="../demo/demo5.html">See demo5 →</a>
+  <a class="demo-link" href="../demo/demo6.html" style="margin-left:.5rem">See demo6 →</a>
+</div>
+
+<h2>Horizontal Bar Chart</h2>
+<div class="card">
+  <p>
+    Add <code>barDirection: 'horizontal'</code> to <code>rendererOptions</code>.
+    The <strong>y-axis</strong> becomes the category axis; the <strong>x-axis</strong>
+    carries the numeric scale. Data format is <code>[xValue, yIndex]</code> pairs,
+    where <code>yIndex</code> maps to a tick position.
+  </p>
+  <pre><code>// Single series — use varyBarColor for per-bar colors without grouped nudge
+$.jqplot('chart', [[
+  [88, 2], [74, 3], [62, 4], [91, 5], [47, 6]
+]], {
+  seriesDefaults: {
+    renderer:        $.jqplot.BarRenderer,
+    rendererOptions: {
+      barDirection: 'horizontal',
+      varyBarColor:  true,
+      barWidth:      22
+    }
+  },
+  seriesColors: ['#27ae60','#2980b9','#8e44ad','#e67e22','#c0392b'],
+  axes: {
+    xaxis: {
+      label:  'Score',
+      min: 0, max: 100,
+      tickOptions: { formatString: '%d' }
+    },
+    yaxis: {
+      // Blank guard ticks at positions 1 and 7 prevent bars touching edges.
+      // Named ticks at 2–6; bar data uses yIndex 2–6 to match.
+      renderer: $.jqplot.CategoryAxisRenderer,
+      ticks: ['', 'React', 'Angular', 'Node.js', 'Python', 'Rust', '']
+    }
+  }
+});</code></pre>
+  <div class="note">
+    <strong>Guard ticks:</strong> Add empty strings at the start and end of the
+    <code>ticks</code> array. This shifts named categories to positions 2…N-1.
+    Bar data y-indices must match these positions exactly.
+  </div>
+  <a class="demo-link" href="../demo/demo5.html">See demo5 →</a>
+</div>
+
+<h2>Value Labels Inside Bars</h2>
+<div class="card">
+  <p>
+    Use the <code>pointLabels</code> plugin with <code>escapeHTML: false</code> to inject
+    styled HTML labels inside bars. For horizontal bars use <code>location: 'w'</code>
+    (anchors the label's right edge at the bar tip).
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.pointLabels.min.js"&gt;&lt;/script&gt;
+
+// Build styled HTML label strings
+var labelStyle = 'font-weight:bold;color:#fff;' +
+  'text-shadow:1px 1px 0 #000,-1px -1px 0 #000,' +
+              '1px -1px 0 #000,-1px 1px 0 #000;';
+
+function hbarLabel(val) {
+  return '&lt;span style="' + labelStyle + '"&gt;' + val + '%&lt;/span&gt;';
+}
+
+// Per-series pointLabels with explicit labels array:
+series: [{
+  pointLabels: {
+    show:          true,
+    location:      'w',        // right-edge of label at bar tip
+    xpadding:      6,
+    escapeHTML:    false,      // allow HTML in label strings
+    edgeTolerance: -100,       // prevent suppression on short bars
+    labels: [hbarLabel(88), hbarLabel(74), hbarLabel(62)]
+  }
+}]</code></pre>
+  <a class="demo-link" href="../demo/demo1.html">See demo1 →</a>
+</div>
+
+<h2>BarRenderer Options Reference</h2>
+<div class="card">
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>barDirection</code></td><td>String</td><td><code>'vertical'</code></td><td><code>'vertical'</code> or <code>'horizontal'</code></td></tr>
+    <tr><td><code>barWidth</code></td><td>Number</td><td>auto</td><td>Bar width/height in pixels. Auto-calculated if omitted.</td></tr>
+    <tr><td><code>barPadding</code></td><td>Number</td><td>8</td><td>Pixels between bars within a group</td></tr>
+    <tr><td><code>barMargin</code></td><td>Number</td><td>10</td><td>Pixels between category groups</td></tr>
+    <tr><td><code>fillToZero</code></td><td>Boolean</td><td>false</td><td>Bars always start at zero even if axis min is non-zero</td></tr>
+    <tr><td><code>varyBarColor</code></td><td>Boolean</td><td>false</td><td>Each bar in a single series gets its own color from <code>seriesColors</code></td></tr>
+    <tr><td><code>shadowOffset</code></td><td>Number</td><td>2</td><td>Drop shadow offset in pixels</td></tr>
+  </table>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

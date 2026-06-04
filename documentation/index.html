@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jqPlot Fork — Documentation</title>
+  <link rel="stylesheet" href="_shared.css">
+  <style>
+    .hero{background:#2c3e50;color:#ecf0f1;padding:2.5rem;border-radius:8px;margin-bottom:2rem}
+    .hero h1{color:#fff;font-size:2.2rem;margin-bottom:.4rem}
+    .hero p{margin:.3rem 0;color:#bdc3c7;font-size:1.05rem}
+    .page-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-bottom:2rem}
+    .page-card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.07);
+               padding:1.2rem 1.4rem;border-top:4px solid #2980b9}
+    .page-card h3{margin:0 0 .4rem;font-size:1rem;color:#2c3e50}
+    .page-card p{margin:0 0 .8rem;font-size:.87rem;color:#555;line-height:1.5}
+    .page-card a.demo-link{font-size:.82rem;padding:.3rem .75rem}
+    .chart-types{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0 .6rem}
+    .ct{background:#eaf0fb;color:#2c3e50;border-radius:3px;
+        padding:1px 7px;font-size:.78rem;font-weight:bold}
+    /* Design section */
+    .design-block{background:#fff;border-radius:8px;
+                  box-shadow:0 2px 8px rgba(0,0,0,.07);padding:1.5rem;margin-bottom:1.5rem}
+    .layer{display:flex;align-items:flex-start;gap:1rem;margin:.8rem 0}
+    .layer-num{flex-shrink:0;width:2rem;height:2rem;border-radius:50%;
+               background:#2980b9;color:#fff;font-weight:bold;font-size:.9rem;
+               display:flex;align-items:center;justify-content:center}
+    .layer-body h4{margin:0 0 .2rem;font-size:.95rem}
+    .layer-body p{margin:0;font-size:.87rem;color:#555}
+  </style>
+</head>
+<body>
+
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <strong style="color:#f1c40f">jqPlot Docs</strong>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+  <a href="../demo/index.html" style="margin-left:auto;color:#95a5a6">← Demo Index</a>
+</nav>
+
+<div class="hero">
+  <h1>jqPlot — Developer Documentation</h1>
+  <p>A modernized fork of the jqPlot charting library.</p>
+  <p style="font-size:.9rem;color:#95a5a6;margin-top:.8rem">
+    Build pipeline: esbuild + clean-css &nbsp;·&nbsp;
+    Source: <code style="color:#f1c40f">src/plugins/</code> →
+    <code style="color:#f1c40f">dist/plugins/</code> via <code style="color:#f1c40f">npm run build</code>
+  </p>
+</div>
+
+<!-- ── Page directory ────────────────────────────────────────────── -->
+<h2>Documentation Pages</h2>
+<div class="page-grid">
+
+  <div class="page-card" style="border-color:#2980b9">
+    <h3>Line Charts</h3>
+    <div class="chart-types">
+      <span class="ct">Basic line</span><span class="ct">Multi-series</span>
+      <span class="ct">Filled area</span><span class="ct">Trendline</span>
+      <span class="ct">Bézier curve</span>
+    </div>
+    <p>Single and multi-series line charts, filled area variants, smooth Bézier curves, and linear trendlines.</p>
+    <a class="demo-link" href="line-charts.html">Read docs →</a>
+  </div>
+
+  <div class="page-card" style="border-color:#e67e22">
+    <h3>Bar Charts</h3>
+    <div class="chart-types">
+      <span class="ct">Vertical bar</span><span class="ct">Horizontal bar</span>
+      <span class="ct">Grouped</span><span class="ct">Category axis</span>
+      <span class="ct">Point labels</span>
+    </div>
+    <p>Vertical and horizontal bar charts, grouped multi-series bars, category axes, and value labels inside bars.</p>
+    <a class="demo-link" href="bar-charts.html">Read docs →</a>
+  </div>
+
+  <div class="page-card" style="border-color:#8e44ad">
+    <h3>Pie &amp; Donut Charts</h3>
+    <div class="chart-types">
+      <span class="ct">Pie</span><span class="ct">Donut</span>
+      <span class="ct">Center label</span><span class="ct">Slice labels</span>
+    </div>
+    <p>Pie and donut charts with configurable start angles, slice labels, and a bold center total value.</p>
+    <a class="demo-link" href="pie-donut.html">Read docs →</a>
+  </div>
+
+  <div class="page-card" style="border-color:#16a085">
+    <h3>Specialized Charts</h3>
+    <div class="chart-types">
+      <span class="ct">Bubble</span><span class="ct">Candlestick</span>
+      <span class="ct">Meter gauge</span><span class="ct">Funnel</span>
+      <span class="ct">Pyramid</span><span class="ct">Block</span><span class="ct">Mekko</span>
+    </div>
+    <p>Financial, scientific, and business-specific chart types available as optional renderer plugins.</p>
+    <a class="demo-link" href="specialized.html">Read docs →</a>
+  </div>
+
+  <div class="page-card" style="border-color:#c0392b">
+    <h3>Axis Types</h3>
+    <div class="chart-types">
+      <span class="ct">Linear</span><span class="ct">Log</span>
+      <span class="ct">Date</span><span class="ct">Category</span>
+    </div>
+    <p>Logarithmic, date/time, and category axis renderers. Format strings, tick intervals, and auto-scaling.</p>
+    <a class="demo-link" href="axis-types.html">Read docs →</a>
+  </div>
+
+  <div class="page-card" style="border-color:#f39c12">
+    <h3>Interaction Plugins</h3>
+    <div class="chart-types">
+      <span class="ct">Highlighter</span><span class="ct">Cursor</span>
+      <span class="ct">Canvas Overlay</span><span class="ct">Draggable</span>
+      <span class="ct">Point Labels</span>
+    </div>
+    <p>Mouse interaction plugins: hover tooltips, crosshair cursor, arbitrary canvas overlays, and draggable data points.</p>
+    <a class="demo-link" href="plugins.html">Read docs →</a>
+  </div>
+
+  <div class="page-card" style="border-color:#27ae60">
+    <h3>Date Enhancement Plugin</h3>
+    <div class="chart-types">
+      <span class="ct">Date ranges</span><span class="ct">Point events</span>
+      <span class="ct">Hover tooltips</span><span class="ct">Auto-collapse</span>
+    </div>
+    <p>Custom plugin adding shaded date ranges, annotated point events, and automatic narrow-range collapsing to any chart.</p>
+    <a class="demo-link" href="date-enhancement.html">Read docs →</a>
+  </div>
+
+</div>
+
+<!-- ── Design approach ───────────────────────────────────────────── -->
+<h2>Design Approach — How jqPlot Uses JavaScript Objects and Arrays</h2>
+
+<div class="design-block">
+  <p>
+    jqPlot is configured entirely through plain JavaScript objects and arrays passed to a single
+    factory function. There is no DOM manipulation required on your part — you describe
+    <em>what</em> you want in a configuration object, and jqPlot figures out <em>how</em> to draw it.
+    Understanding this structure unlocks the full library.
+  </p>
+
+  <h3>The Factory Call</h3>
+  <p>Every chart starts with one function call:</p>
+  <pre><code>$.jqplot( targetId, seriesData, options );</code></pre>
+  <table>
+    <tr><th>Argument</th><th>Type</th><th>Role</th></tr>
+    <tr><td><code>targetId</code></td><td>String</td><td>ID of the container <code>&lt;div&gt;</code></td></tr>
+    <tr><td><code>seriesData</code></td><td>Array of Arrays</td><td>The data — one inner array per series</td></tr>
+    <tr><td><code>options</code></td><td>Object</td><td>Everything else: axes, series styling, plugins, legend…</td></tr>
+  </table>
+
+  <h3>Series Data — Array of Arrays</h3>
+  <p>
+    The second argument is always an <strong>array of arrays</strong>. Each inner array is one
+    series. A series is itself an array of data points. A data point is either a plain number
+    (jqPlot infers the x from its index) or a two-element array <code>[x, y]</code>.
+  </p>
+  <pre><code>// Three series, each with implicit x = 1,2,3,4
+$.jqplot('chart', [
+  [10, 20, 15, 30],          // series 1
+  [25, 18, 22, 28],          // series 2
+  [5,  12,  8, 18]           // series 3
+]);
+
+// Explicit [x, y] pairs — required for date axes or sparse data
+$.jqplot('chart', [
+  [['2024-01-01', 12.4], ['2024-06-01', 18.9], ['2025-01-01', 24.7]]
+]);</code></pre>
+
+  <div class="note">
+    The outer array is always present even for a single series:
+    <code>$.jqplot('id', [ [1,2,3] ])</code> — not <code>$.jqplot('id', [1,2,3])</code>.
+  </div>
+
+  <h3>The Options Object — Nested Structure</h3>
+  <p>
+    The third argument is a plain object whose top-level keys map to chart subsystems.
+    Each subsystem is itself an object with its own keys. This nesting is consistent
+    throughout the library.
+  </p>
+  <pre><code>$.jqplot('chart', [data], {
+
+  // ── Top-level keys ────────────────────────────────────────────
+  title:  'My Chart',         // string or object
+  legend: { show: true, location: 'nw' },
+  grid:   { shadow: false, background: '#fafbfc' },
+
+  // ── seriesDefaults: applied to ALL series ─────────────────────
+  seriesDefaults: {
+    renderer:        $.jqplot.BarRenderer,   // swap the draw engine
+    rendererOptions: { barPadding: 4 },      // options for that renderer
+    showMarker:      false
+  },
+
+  // ── series: array, one object per series (overrides defaults) ─
+  series: [
+    { label: 'Revenue', color: '#2980b9', lineWidth: 2.5 },
+    { label: 'Cost',    color: '#e74c3c', lineWidth: 1.5 }
+  ],
+
+  // ── axes: object keyed by axis name ───────────────────────────
+  axes: {
+    xaxis: {
+      renderer:    $.jqplot.DateAxisRenderer,
+      tickInterval:'1 year',
+      tickOptions: { formatString: '%Y' }
+    },
+    yaxis: {
+      label:         'Revenue ($M)',
+      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+      min:  0,
+      tickOptions: { formatString: '$%.1fM' }
+    }
+  }
+});</code></pre>
+
+  <h3>Renderers — Swapping the Drawing Engine</h3>
+  <p>
+    jqPlot's most powerful pattern is the <strong>renderer</strong> system.
+    Almost every visual component — series, axes, ticks, legend — has a default renderer
+    that can be replaced by assigning a different class to the <code>renderer</code> property.
+    The renderer is a constructor function; jqPlot instantiates it internally.
+  </p>
+
+  <div class="card-row">
+    <div class="card">
+      <h4>Series renderers</h4>
+      <p>Set on <code>seriesDefaults.renderer</code> or per-series in the <code>series</code> array.</p>
+      <pre><code>seriesDefaults: {
+  renderer: $.jqplot.BarRenderer
+}
+// or per-series:
+series: [
+  { renderer: $.jqplot.OHLCRenderer,
+    rendererOptions: { candleStick: true } }
+]</code></pre>
+    </div>
+    <div class="card">
+      <h4>Axis renderers</h4>
+      <p>Set on the axis object inside <code>axes</code>.</p>
+      <pre><code>axes: {
+  xaxis: {
+    renderer: $.jqplot.DateAxisRenderer
+  },
+  yaxis: {
+    renderer: $.jqplot.LogAxisRenderer
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>Plugins — Self-Registering via Hooks</h3>
+  <p>
+    Interactive plugins (Highlighter, Cursor, Draggable, CanvasOverlay, dateEnhancement)
+    are loaded via <code>&lt;script&gt;</code> tags and <strong>self-register</strong> by pushing
+    handler functions onto global hook arrays. You never call them directly — jqPlot's
+    draw pipeline invokes them at the right moment.
+  </p>
+  <pre><code>// Inside a plugin source file — this runs at script-load time:
+$.jqplot.postDrawHooks.push($.jqplot.CanvasOverlay.postPlotDraw);
+$.jqplot.preParseOptionsHooks.push($.jqplot.DateEnhancement.preParseOptions);</code></pre>
+  <p>
+    You activate a plugin by including its options object in the chart options.
+    If the plugin key is absent, the plugin is loaded but does nothing.
+  </p>
+  <pre><code>// Highlighter activates when this key is present:
+$.jqplot('chart', [data], {
+  highlighter: {
+    show:        true,
+    tooltipAxes: 'both',
+    formatString:'&lt;strong&gt;x=%s  y=%s&lt;/strong&gt;'
+  }
+});</code></pre>
+
+  <h3>The Hook Pipeline</h3>
+  <p>jqPlot's internal lifecycle fires hook arrays at key moments. Plugins use these to inject behavior without modifying core:</p>
+
+  <div class="layer">
+    <div class="layer-num">1</div>
+    <div class="layer-body">
+      <h4><code>$.jqplot.preInitHooks</code></h4>
+      <p>Called before the plot object is initialized. Args: <code>(target, data, options)</code>. Use to mutate options before they are parsed.</p>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-num">2</div>
+    <div class="layer-body">
+      <h4><code>$.jqplot.preParseOptionsHooks</code></h4>
+      <p>Called just before <code>gridPadding</code> and other layout options are merged. Args: <code>(options)</code> — one argument only, <code>this</code> is the plot object. Use to adjust layout before the grid is sized.</p>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-num">3</div>
+    <div class="layer-body">
+      <h4><code>$.jqplot.postInitHooks</code></h4>
+      <p>Called after the plot object is fully initialized. Args: <code>(target, data, options)</code>.</p>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-num">4</div>
+    <div class="layer-body">
+      <h4><code>$.jqplot.preDrawHooks</code></h4>
+      <p>Called before canvas drawing begins. Use to modify series data or axis bounds.</p>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-num">5</div>
+    <div class="layer-body">
+      <h4><code>$.jqplot.postDrawHooks</code></h4>
+      <p>Called after all canvas drawing is complete. Args: none — <code>this</code> is the plot object. The primary hook for overlay plugins (CanvasOverlay, dateEnhancement). At this point <code>plot._gridPadding</code>, <code>plot.axes.xaxis.series_u2p()</code> and all layout values are finalized.</p>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>Hook signature pitfall:</strong> <code>preParseOptionsHooks</code> receives only
+    <code>(options)</code> — not <code>(target, data, options)</code> like <code>preInitHooks</code>.
+    Declaring the wrong number of parameters is a silent error that causes options to be
+    misread and can crash the entire plot initialization.
+  </div>
+
+  <h3>Coordinate Conversion — Data Units to Pixels</h3>
+  <p>
+    After a plot is drawn, each axis exposes <code>series_u2p(value)</code> which converts
+    a data-unit value to a pixel offset <em>relative to the grid origin</em>
+    (<code>plot._gridPadding.left</code>). To get an absolute canvas pixel:
+  </p>
+  <pre><code>var plot  = $.jqplot('chart', [data], options);
+
+// After draw, inside a postDrawHooks handler:
+var xPx = plot._gridPadding.left + plot.axes.xaxis.series_u2p(dataValue);
+var yPx = plot._gridPadding.top  + plot.axes.yaxis.series_u2p(dataValue);
+
+// For DateAxisRenderer axes, convert the date string to a timestamp first:
+var ts  = new $.jsDate('2024-06-01').getTime();
+var xPx = plot._gridPadding.left + plot.axes.xaxis.series_u2p(ts);</code></pre>
+
+  <h3>Key Object Reference</h3>
+  <table>
+    <tr><th>Object / Property</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>plot._gridPadding</code></td><td>Object</td><td><code>{top, right, bottom, left}</code> — pixel offsets from canvas edge to grid boundary</td></tr>
+    <tr><td><code>plot._plotDimensions</code></td><td>Object</td><td><code>{width, height}</code> — total canvas pixel dimensions</td></tr>
+    <tr><td><code>plot.axes.xaxis</code></td><td>Object</td><td>The x-axis instance. Has <code>.min</code>, <code>.max</code>, <code>.series_u2p()</code>, <code>.renderer</code></td></tr>
+    <tr><td><code>plot.series[n]</code></td><td>Object</td><td>Series instance. Has <code>.data</code>, <code>.color</code>, <code>.renderer</code></td></tr>
+    <tr><td><code>plot.options</code></td><td>Object</td><td>The merged options object — includes plugin options like <code>dateRanges</code></td></tr>
+    <tr><td><code>plot.target</code></td><td>jQuery</td><td>The container element — use to inject DOM labels with <code>plot.target.append($lbl)</code></td></tr>
+    <tr><td><code>plot.eventCanvas._elem</code></td><td>jQuery</td><td>The top-most canvas that receives mouse events. Bind mouse handlers here.</td></tr>
+  </table>
+</div>
+
+<!-- ── Quick-start ───────────────────────────────────────────────── -->
+<h2>Quick Start</h2>
+<div class="card">
+<pre><code>&lt;!-- 1. Load jQuery --&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. Load jqPlot core --&gt;
+&lt;link  rel="stylesheet" href="dist/jquery.jqplot.min.css"&gt;
+&lt;script src="dist/jquery.jqplot.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- 3. Load only the plugins you need --&gt;
+&lt;script src="dist/plugins/jqplot.barRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.categoryAxisRenderer.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- 4. A container div --&gt;
+&lt;div id="my-chart" style="width:600px;height:300px;"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+$(document).ready(function() {
+  $.jqplot('my-chart', [[48, 63, 71, 55, 82]], {
+    seriesDefaults: {
+      renderer: $.jqplot.BarRenderer,
+      rendererOptions: { fillToZero: true }
+    },
+    axes: {
+      xaxis: {
+        renderer: $.jqplot.CategoryAxisRenderer,
+        ticks: ['Jan','Feb','Mar','Apr','May']
+      }
+    }
+  });
+});
+&lt;/script&gt;</code></pre>
+  <div class="tip">
+    Always wrap <code>$.jqplot()</code> calls inside <code>$(document).ready()</code> —
+    the container <code>&lt;div&gt;</code> must exist in the DOM before jqPlot can measure it.
+  </div>
+</div>
+
+<!-- ── Build pipeline ────────────────────────────────────────────── -->
+<h2>Build Pipeline</h2>
+<div class="card">
+  <p>
+    Source files live in <code>src/</code>. The <code>dist/</code> directory is
+    <strong>gitignored</strong> and must be regenerated after any source change.
+  </p>
+  <pre><code>npm install       # first time only — installs esbuild and clean-css
+npm run build     # every time src/ changes — writes to dist/</code></pre>
+  <table>
+    <tr><th>Source</th><th>Built output</th><th>When to rebuild</th></tr>
+    <tr><td><code>src/plugins/jqplot.*.js</code></td><td><code>dist/plugins/jqplot.*.min.js</code></td><td>Any plugin source change</td></tr>
+    <tr><td><code>src/jquery.jqplot.js</code></td><td><code>dist/jquery.jqplot.min.js</code></td><td>Core source change</td></tr>
+    <tr><td><code>src/jquery.jqplot.css</code></td><td><code>dist/jquery.jqplot.min.css</code></td><td>CSS change</td></tr>
+  </table>
+  <div class="note">
+    Changes to <code>demo/*.html</code> or <code>docs/*.html</code> do not require a rebuild —
+    they are served directly. Only changes to <code>src/</code> require <code>npm run build</code>.
+  </div>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

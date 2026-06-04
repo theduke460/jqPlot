@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jqPlot Demo 6 — Highlighter · Cursor · Canvas Overlay · Draggable · Category Axis · Date Axis · Log Axis</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link  rel="stylesheet" href="../dist/jquery.jqplot.min.css">
+  <script src="../dist/jquery.jqplot.min.js"></script>
+
+  <!-- Plugin load order: dependencies before dependents -->
+  <script src="../dist/plugins/jqplot.canvasTextRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.dateAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.dateEnhancement.min.js"></script>
+  <script src="../dist/plugins/jqplot.logAxisRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.barRenderer.min.js"></script>
+  <script src="../dist/plugins/jqplot.canvasOverlay.min.js"></script>
+  <script src="../dist/plugins/jqplot.highlighter.min.js"></script>
+  <script src="../dist/plugins/jqplot.cursor.min.js"></script>
+  <script src="../dist/plugins/jqplot.draggable.min.js"></script>
+  <script src="../dist/plugins/jqplot.pointLabels.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #f4f6f9;
+      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      color: #333;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      color: #2980b9;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .back-link::before { content: "← "; }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.8rem;
+      color: #2c3e50;
+    }
+
+    .subtitle {
+      color: #666;
+      margin: 0 0 2.5rem;
+      font-size: 0.95rem;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      flex: 1 1 480px;
+    }
+
+    .chart-card.full-width {
+      flex: 1 1 100%;
+    }
+
+    .chart-card h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1.05rem;
+      color: #2c3e50;
+      border-bottom: 2px solid #e8ecf0;
+      padding-bottom: 0.5rem;
+    }
+
+    .plugin-badge {
+      display: inline-block;
+      margin: 0 0 1rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 0.03em;
+      background: #2c3e50;
+      color: #fff;
+    }
+
+    .chart-note {
+      margin: 0.75rem 0 0;
+      font-size: 0.8rem;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* Chart canvas areas */
+    #highlight-chart { width: 100%; height: 300px; }
+    #cursor-chart    { width: 100%; height: 300px; }
+    #overlay-chart   { width: 100%; height: 300px; }
+    #drag-chart      { width: 100%; height: 300px; }
+    #catbar-chart    { width: 100%; height: 300px; }
+    #date-chart      { width: 100%; height: 300px; }
+    #log2-chart      { width: 100%; height: 300px; }
+    #dateenh-chart   { width: 100%; height: 340px; }
+    #history-chart   { width: 100%; height: 400px; }
+
+    /* Draggable chart — note strip below canvas */
+    #drag-output {
+      margin-top: 0.6rem;
+      padding: 0.4rem 0.75rem;
+      background: #f0f4f8;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #555;
+      font-family: "Courier New", monospace;
+      min-height: 1.6rem;
+    }
+
+    footer {
+      margin-top: 1rem;
+      color: #999;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="back-link" href="index.html">Demo Index</a>
+
+  <h1>jqPlot Demo 6</h1>
+  <p class="subtitle">
+    Highlighter &middot; Cursor &middot; Canvas Overlay &middot; Draggable
+    &middot; Category Axis &middot; Date Axis &middot; Log Axis
+  </p>
+
+  <!-- Row 1: Highlighter + Cursor -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Server Response Times (ms)</h2>
+      <div class="plugin-badge">Highlighter</div>
+      <div id="highlight-chart"></div>
+      <p class="chart-note">
+        Hover over any data point to see a formatted tooltip showing the exact
+        server and response time. The <code>highlighter</code> plugin enlarges
+        the nearest marker and renders the tooltip via <code>tooltipAxes</code>
+        and <code>formatString</code>.
+      </p>
+    </div>
+
+    <div class="chart-card">
+      <h2>CPU Utilization — Three Cores (%)</h2>
+      <div class="plugin-badge">Cursor</div>
+      <div id="cursor-chart"></div>
+      <p class="chart-note">
+        Move your mouse across the chart to track the crosshair cursor.
+        The <code>cursor</code> plugin renders a live x/y readout inside the
+        plot area. <code>showTooltip:true</code> + <code>followMouse:true</code>
+        keeps the label beside the crosshair intersection.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Row 2: Canvas Overlay + Draggable -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Stock Price with Target Zones</h2>
+      <div class="plugin-badge">Canvas Overlay</div>
+      <div id="overlay-chart"></div>
+      <p class="chart-note">
+        The <code>canvasOverlay</code> plugin draws arbitrary lines on top of
+        the chart after it renders. Here a solid green <em>buy zone</em> line,
+        a solid red <em>sell zone</em> line, and a dashed orange
+        <em>analyst target</em> line are added without touching the series data.
+      </p>
+    </div>
+
+    <div class="chart-card">
+      <h2>Sensor Readings — Drag to Edit</h2>
+      <div class="plugin-badge">Draggable</div>
+      <div id="drag-chart"></div>
+      <div id="drag-output">Drag any point to edit its value…</div>
+      <p class="chart-note">
+        The <code>draggable</code> plugin makes each marker interactively
+        moveable. The output strip above updates in real time via the
+        <code>jqplotDataChange</code> event as points are dragged.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Row 3: Category Axis bar (full width) -->
+  <div class="chart-row">
+    <div class="chart-card full-width">
+      <h2>Monthly Sales by Region — Q1</h2>
+      <div class="plugin-badge">Category Axis</div>
+      <div id="catbar-chart"></div>
+      <p class="chart-note">
+        <code>CategoryAxisRenderer</code> assigns one evenly-spaced slot per
+        label on the x-axis — no numeric scale is implied. Two series (North,
+        South) produce grouped bars with automatic <code>_barNudge</code>
+        offset. Labels come from the <code>ticks</code> array.
+      </p>
+    </div>
+  </div>
+
+  <!-- Row 4: Date Axis + Log Axis -->
+  <div class="chart-row">
+
+    <div class="chart-card">
+      <h2>Annual Revenue 2015–2024</h2>
+      <div class="plugin-badge">Date Axis</div>
+      <div id="date-chart"></div>
+      <p class="chart-note">
+        <code>DateAxisRenderer</code> parses date strings on the x-axis and
+        formats tick labels via strftime patterns. Here <code>'%Y'</code>
+        shows only the year. Data is passed as <code>['YYYY-MM-DD', value]</code>
+        pairs; jqPlot converts them to numeric timestamps internally.
+      </p>
+    </div>
+
+    <div class="chart-card">
+      <h2>RF Signal Strength vs Distance</h2>
+      <div class="plugin-badge">Log Axis</div>
+      <div id="log2-chart"></div>
+      <p class="chart-note">
+        Both axes use <code>LogAxisRenderer</code> — a log-log plot.
+        RF signal power follows an inverse-square law with distance, producing
+        a straight line on a log-log scale. A second series shows measured
+        values with real-world multipath fading.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Row 5: DateEnhancement — two-line ticks, ranges, events (full width) -->
+  <div class="chart-row">
+    <div class="chart-card full-width">
+      <h2>Product Revenue Timeline — Two-Line Ticks · Time Ranges · Time Events</h2>
+      <div class="plugin-badge">Date Axis Enhanced</div>
+      <div id="dateenh-chart"></div>
+      <p class="chart-note">
+        Demonstrates three <code>dateEnhancement</code> plugin features:
+        (1) two-line tick labels using <code>\n</code> in <code>formatString</code>;
+        (2) shaded <code>dateRanges</code> with color, opacity, and label;
+        (3) <code>dateEvents</code> shown as labeled markers with randomized Y positions
+        to reduce label collision — each event has a deterministic seed for stable placement.
+      </p>
+    </div>
+  </div>
+
+  <!-- Row 6: Historical Timeline 1910–2025 (full width) -->
+  <div class="chart-row">
+    <div class="chart-card full-width">
+      <h2>Historical Timeline 1910–2025 — Wars · Recessions · NASA Programs · Key Events</h2>
+      <div class="plugin-badge">Date Axis Enhanced</div>
+      <div id="history-chart"></div>
+      <p class="chart-note">
+        Green ranges: major US wars. Blue ranges: US economic recessions (post-1960).
+        Yellow ranges: NASA human spaceflight programs (Gemini, Apollo, Space Shuttle).
+        Ranges narrower than 100px are automatically collapsed into
+        <strong>diamond</strong> markers (collapsed range) rather than cluttered inline labels.
+        <strong>Circle</strong> markers indicate point-in-time events.
+        Five key historical events are shown as circles.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    jqPlot &mdash; modernized fork &mdash;
+    <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+  </footer>
+
+  <script>
+  $(document).ready(function () {
+
+    // ── 1. Highlighter — Server Response Times ────────────────────────────────
+    // Three web servers measured over 10 sample points.
+    // highlighter.formatString uses %s placeholders matched to tooltipAxes.
+    // sizeAdjust enlarges the proximity hit-zone; bringSeriesToFront keeps
+    // the hovered series marker on top.
+
+    $.jqplot('highlight-chart', [
+      [[1,142],[2,198],[3,167],[4,223],[5,185],[6,201],[7,156],[8,178],[9,210],[10,192]],
+      [[1,287],[2,312],[3,268],[4,334],[5,298],[6,315],[7,279],[8,301],[9,345],[10,288]],
+      [[1, 98],[2,112],[3, 87],[4,134],[5,108],[6, 95],[7,121],[8,103],[9,118],[10,99]]
+    ], {
+      series: [
+        { label: 'Server A', color: '#3498db', lineWidth: 2.5,
+          markerOptions: { size: 8, style: 'filledCircle' } },
+        { label: 'Server B', color: '#e74c3c', lineWidth: 2.5,
+          markerOptions: { size: 8, style: 'filledCircle' } },
+        { label: 'Server C', color: '#27ae60', lineWidth: 2.5,
+          markerOptions: { size: 8, style: 'filledCircle' } }
+      ],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: { label: 'Sample', min: 1, max: 10, tickInterval: 1 },
+        yaxis: {
+          label:         'Response Time (ms)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min: 0,
+          tickOptions:   { formatString: '%dms' }
+        }
+      },
+      highlighter: {
+        show:              true,
+        sizeAdjust:        8,
+        tooltipAxes:       'both',
+        bringSeriesToFront: true,
+        formatString:      '<strong>Sample %s &nbsp;→&nbsp; %s ms</strong>'
+      },
+      cursor: { show: false },
+      // dateRanges and dateEvents work on numeric axes too —
+      // 'start'/'end' and 'date' accept numeric x values directly.
+      dateRanges: [
+        { start: 4, end: 7,
+          color: '#f39c12', opacity: 0.12,
+          label: 'Peak Load Window', labelColor: '#d68910' }
+      ],
+      dateEvents: [
+        { date: 4, label: 'Cache Miss Spike',
+          color: '#e74c3c', size: 7, seed: 10 },
+        { date: 8, label: 'CDN Failover',
+          color: '#8e44ad', size: 7, seed: 20 }
+      ],
+      grid:   { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 2. Cursor — CPU Utilization ───────────────────────────────────────────
+    // cursor plugin renders a crosshair and live coordinate tooltip.
+    // showTooltip:true + followMouse:true keeps the readout beside the cursor.
+    // constrainZoomTo:'x' limits any zoom gesture to the x-axis only.
+    // Note: highlighter and cursor should not both be active on the same chart
+    // as they compete for mouse events — use one or the other.
+
+    var cpuSamples = [];
+    for (var i = 0; i <= 30; i++) {
+      cpuSamples.push(i);
+    }
+
+    // Data is generated with its natural range — no clamping.
+    // The y-axis uses autoscaling (no hardcoded min/max) with padMin/padMax
+    // adding 10% breathing room below and above the actual data extremes.
+    // This is the correct general solution: the axis adapts to whatever data
+    // it receives rather than requiring the data to fit a preset range.
+    var core0 = cpuSamples.map(function(x) {
+      return [x, Math.round(35 + 22 * Math.sin(x * 0.4) + 8 * Math.sin(x * 0.9 + 1))];
+    });
+    var core1 = cpuSamples.map(function(x) {
+      return [x, Math.round(55 + 18 * Math.sin(x * 0.35 + 0.5) + 7 * Math.cos(x * 0.7))];
+    });
+    var core2 = cpuSamples.map(function(x) {
+      return [x, Math.round(30 + 20 * Math.cos(x * 0.45 + 1.2) + 10 * Math.sin(x * 0.8))];
+    });
+
+    $.jqplot('cursor-chart', [core0, core1, core2], {
+      series: [
+        { label: 'Core 0', color: '#8e44ad', lineWidth: 2,
+          markerOptions: { show: false } },
+        { label: 'Core 1', color: '#e67e22', lineWidth: 2,
+          markerOptions: { show: false } },
+        { label: 'Core 2', color: '#16a085', lineWidth: 2,
+          markerOptions: { show: false } }
+      ],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: {
+          label: 'Time (s)',
+          min:   0,
+          max:   30,
+          tickInterval: 5
+        },
+        yaxis: {
+          label:         'Utilization (%)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          // No hardcoded min/max — jqPlot autoscales from the data range.
+          // padMin/padMax add 3% margin below/above the data extremes so
+          // peaks and troughs never touch the grid boundary, regardless of
+          // what values the data source produces.
+          padMin:  1.03,
+          padMax:  1.03,
+          tickOptions: { formatString: '%d%%' }
+        }
+      },
+      // cursor: crosshair drawn at the mouse position with a live coordinate
+      // tooltip.  showVerticalLine/showHorizontalLine control the hairlines.
+      // tooltipFormatString formats the x/y readout in the tooltip box.
+      cursor: {
+        show:                true,
+        showTooltip:         true,
+        followMouse:         true,
+        showVerticalLine:    true,
+        showHorizontalLine:  true,
+        // useAxesFormatters:true uses each axis's own tick formatString for
+        // the tooltip readout — avoids unit/scale mismatch with custom
+        // tooltipFormatString printf tokens.
+        // showTooltipUnitPosition:true is required to activate this path.
+        // useAxesFormatters delegates tooltip formatting to each axis tick
+        // formatter. tooltipAxisGroups auto-builds as [xaxis, yaxis] so the
+        // tooltip shows "t=<x>, util=<y>" using each axis formatString.
+        useAxesFormatters:        true,
+        showTooltipUnitPosition:  true,
+        showTooltipGridPosition:  false,
+        tooltipAxisGroups:        [["xaxis", "yaxis"]],
+        tooltipFormatString:      "t=%s  util=%s",
+        style:               'crosshair'
+      },
+      highlighter: { show: false },
+      dateRanges: [
+        { start: 8,  end: 14,
+          color: '#e74c3c', opacity: 0.10,
+          label: 'High Load', labelColor: '#c0392b' },
+        { start: 20, end: 26,
+          color: '#27ae60', opacity: 0.10,
+          label: 'Throttled', labelColor: '#1e8449' }
+      ],
+      dateEvents: [
+        { date: 8,  label: 'Batch Job Start',
+          color: '#e74c3c', size: 7, seed: 11 },
+        { date: 20, label: 'Throttle Applied',
+          color: '#27ae60', size: 7, seed: 22 }
+      ],
+      grid: { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 3. Canvas Overlay — Stock Price with Target Zones ────────────────────
+    // canvasOverlay draws after all series are rendered.
+    // Objects array accepts: horizontalLine, dashedHorizontalLine,
+    // verticalLine, dashedVerticalLine, line.
+    // yOffset is in axis data units (same scale as the y-axis).
+    // lineWidth, color, and shadow are per-line options.
+
+    var stockPrice = [
+      [1,142],[2,148],[3,151],[4,146],[5,155],[6,162],[7,158],
+      [8,171],[9,168],[10,175],[11,179],[12,172],[13,181],[14,188],[15,184]
+    ];
+
+    $.jqplot('overlay-chart', [stockPrice], {
+      series: [{
+        label:       'ACME Corp',
+        color:       '#2c3e50',
+        lineWidth:   2.5,
+        markerOptions: { size: 6, style: 'filledCircle' }
+      }],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: {
+          label: 'Trading Day',
+          min: 1, max: 15, tickInterval: 1
+        },
+        yaxis: {
+          label:         'Price ($)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min:  120,
+          max:  210,
+          tickOptions: { formatString: '$%d' }
+        }
+      },
+      // canvasOverlay: draw horizontal reference lines in data-unit coordinates.
+      // Each object specifies its type, yOffset (data value), and visual style.
+      canvasOverlay: {
+        show: true,
+        objects: [
+          // Solid green line — buy zone floor
+          { horizontalLine: {
+              name:      'buy-zone',
+              y:          145,
+              lineWidth:  2,
+              color:     '#27ae60',
+              shadow:     false,
+              lineCap:   'butt'
+          }},
+          // Solid red line — sell zone ceiling
+          { horizontalLine: {
+              name:      'sell-zone',
+              y:          180,
+              lineWidth:  2,
+              color:     '#e74c3c',
+              shadow:     false,
+              lineCap:   'butt'
+          }},
+          // Dashed orange line — analyst 12-month price target
+          { dashedHorizontalLine: {
+              name:      'analyst-target',
+              y:          195,
+              lineWidth:  2,
+              color:     '#e67e22',
+              dashPattern: [8, 5],
+              shadow:     false
+          }}
+        ]
+      },
+      cursor:      { show: false },
+      highlighter: { show: false },
+      grid:        { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 4. Draggable — Sensor Readings ────────────────────────────────────────
+    // draggable plugin makes each marker moveable by click-drag.
+    // constrainTo:'y' locks horizontal position so only the value changes.
+    // The jqplotDataChange event fires continuously during drag, providing
+    // the series index, point index, and new [x, y] value.
+
+    var sensorData = [
+      [1,22.4],[2,23.1],[3,21.8],[4,24.7],[5,23.9],
+      [6,25.2],[7,24.1],[8,26.3],[9,25.7],[10,24.5]
+    ];
+
+    var dragPlot = $.jqplot('drag-chart', [sensorData, sensorData.map(function(pt) {
+      return [pt[0], pt[1] - 3.5];   // second series: reference baseline offset
+    })], {
+      series: [
+        { label: 'Sensor A', color: '#2980b9', lineWidth: 2.5,
+          markerOptions: { size: 10, style: 'filledCircle' },
+          isDraggable: true    // opt-in per series
+        },
+        { label: 'Baseline', color: '#bdc3c7', lineWidth: 1.5,
+          linePattern:   'dashed',
+          markerOptions: { show: false },
+          isDraggable:    false   // baseline is not draggable
+        }
+      ],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: { label: 'Reading #', min: 1, max: 10, tickInterval: 1 },
+        yaxis: {
+          label:         'Temperature (°C)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min:  15,
+          max:  32,
+          tickOptions: { formatString: '%.1f°' }
+        }
+      },
+      // draggable: constrainTo limits movement to one axis.
+      // 'y' means the x-position is locked; only the value (y) changes.
+      draggable: {
+        show:       true,
+        constrainTo: 'y'
+      },
+      cursor:      { show: false },
+      highlighter: { show: false },
+      grid:        { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+    // jqplotDataChange fires on every drag move.
+    // evt: jQuery event; data: { seriesIndex, pointIndex, data:[x,y] }
+    $('#drag-chart').on('jqplotDataChange', function (evt, seriesIndex, pointIndex, data) {
+      $('#drag-output').text(
+        'Series ' + (seriesIndex + 1) +
+        '  |  Point #' + (pointIndex + 1) +
+        '  |  Reading=' + data[0] +
+        '  |  Temp=' + data[1].toFixed(2) + '°C'
+      );
+    });
+
+
+    // ── 5. Category Axis — Monthly Sales by Region ───────────────────────────
+    // Two series (North, South) share the same CategoryAxisRenderer x-axis.
+    // jqPlot auto-applies _barNudge to produce side-by-side grouped bars.
+    // ticks array supplies string labels; no numeric xaxis scale is implied.
+
+    var northSales = [48, 63, 71, 55, 82, 76];
+    var southSales = [39, 51, 68, 44, 73, 61];
+    var months     = ['January', 'February', 'March', 'April', 'May', 'June'];
+
+    $.jqplot('catbar-chart', [northSales, southSales], {
+      seriesDefaults: {
+        renderer:        $.jqplot.BarRenderer,
+        rendererOptions: { barPadding: 5, barMargin: 16, shadowOffset: 1.5 },
+        pointLabels:     { show: false }
+      },
+      series: [
+        { label: 'North Region', color: '#2e86c1' },
+        { label: 'South Region', color: '#e59866' }
+      ],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: {
+          // CategoryAxisRenderer: each data point gets one evenly-spaced slot.
+          // String ticks provide the category labels shown on the axis.
+          renderer:    $.jqplot.CategoryAxisRenderer,
+          ticks:       months,
+          tickOptions: { angle: -20 }
+        },
+        yaxis: {
+          label:         'Sales ($k)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min:  0,
+          max:  100,
+          tickOptions: { formatString: '$%dk' }
+        }
+      },
+      grid: { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 6. Date Axis — Annual Revenue 2015–2024 ───────────────────────────────
+    // DateAxisRenderer parses date strings and converts them to timestamps.
+    // Data format: ['YYYY-MM-DD', value] — Jan 1 of each year used as anchor.
+    // tickOptions.formatString uses strftime syntax; '%Y' shows only the year.
+    // tickInterval:'1 year' controls the spacing between ticks.
+
+    var revenueData = [
+      ['2015-01-01', 12.4],
+      ['2016-01-01', 14.8],
+      ['2017-01-01', 17.1],
+      ['2018-01-01', 15.6],
+      ['2019-01-01', 21.3],
+      ['2020-01-01', 18.9],
+      ['2021-01-01', 24.7],
+      ['2022-01-01', 28.2],
+      ['2023-01-01', 31.5],
+      ['2024-01-01', 35.8]
+    ];
+
+    $.jqplot('date-chart', [revenueData], {
+      series: [{
+        label:     'Annual Revenue',
+        color:     '#8e44ad',
+        lineWidth:  2.5,
+        fill:       true,
+        fillAlpha:  0.15,
+        markerOptions: { size: 8, style: 'filledCircle' }
+      }],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: {
+          // DateAxisRenderer: parses date strings; formats ticks with strftime.
+          // tickInterval controls the spacing (e.g. '1 year', '6 months', '1 day').
+          // '%Y' produces four-digit year labels only.
+          renderer:     $.jqplot.DateAxisRenderer,
+          tickInterval: '1 year',
+          tickOptions:  { formatString: '%Y', angle: -30 },
+          label:        'Year',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+        },
+        yaxis: {
+          label:         'Revenue ($M)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min:  0,
+          tickOptions: { formatString: '$%.1fM' }
+        }
+      },
+      highlighter: {
+        show:        true,
+        sizeAdjust:  7,
+        tooltipAxes: 'both',
+        formatString: '<strong>%s &nbsp; $%s M</strong>'
+      },
+      cursor: { show: false },
+      grid:   { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 7. Log Axis — RF Signal Strength vs Distance (log-log plot) ──────────
+    // Both x and y axes use LogAxisRenderer — a true log-log chart.
+    // Theoretical series follows the inverse-square law: P ∝ 1/d²
+    // Measured series adds realistic multipath fading variation.
+    // On a log-log scale the inverse-square law produces a straight line
+    // with slope -2, making deviations from theory clearly visible.
+
+    var distances   = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
+
+    // Theoretical: P = 1000 / d²  (mW, free-space path loss model)
+    var theoretical = distances.map(function(d) { return [d, 1000 / (d * d)]; });
+
+    // Measured: theoretical with ±30% multipath fading
+    var fading      = [0.82, 1.15, 0.94, 0.71, 1.28, 0.88, 1.05, 0.76, 1.19, 0.93];
+    var measured    = distances.map(function(d, i) {
+      return [d, Math.max(0.0001, (1000 / (d * d)) * fading[i])];
+    });
+
+    $.jqplot('log2-chart', [theoretical, measured], {
+      series: [
+        { label: 'Theoretical (1/d²)',
+          color: '#2980b9', lineWidth: 2,
+          markerOptions: { show: false }
+        },
+        { label: 'Measured (with fading)',
+          color: '#e74c3c', lineWidth: 1.5,
+          markerOptions: { size: 7, style: 'filledCircle' }
+        }
+      ],
+      legend: { show: true, location: 'ne' },
+      axes: {
+        // LogAxisRenderer on both axes produces a log-log plot.
+        // base defaults to 10; tickDistribution:'even' places ticks at 10^n.
+        // min must be > 0 on both axes (log of 0 is undefined).
+        xaxis: {
+          renderer:         $.jqplot.LogAxisRenderer,
+          label:            'Distance (m)',
+          labelRenderer:    $.jqplot.CanvasAxisLabelRenderer,
+          tickDistribution: 'even',
+          tickOptions:      { formatString: '%dm' }
+        },
+        yaxis: {
+          renderer:         $.jqplot.LogAxisRenderer,
+          label:            'Signal Power (mW)',
+          labelRenderer:    $.jqplot.CanvasAxisLabelRenderer,
+          tickDistribution: 'even',
+          tickOptions:      { formatString: '%.4f' }
+        }
+      },
+      highlighter: {
+        show:        true,
+        sizeAdjust:  7,
+        tooltipAxes: 'both',
+        formatString: '<strong>d=%s m &nbsp; P=%s mW</strong>'
+      },
+      cursor: { show: false },
+      grid:   { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 8. DateEnhancement — Two-line ticks, Time Ranges, Time Events ─────────
+    // Demonstrates all three capabilities of jqplot.dateEnhancement.js on a
+    // single revenue timeline chart spanning 2015–2024.
+    //
+    // (1) Two-line tick labels: formatString uses \n to split month+day onto
+    //     line 1 and year onto line 2. CanvasAxisTickRenderer renders HTML
+    //     so the <br> injected by DateTickFormatter is honoured.
+    //
+    // (2) dateRanges: each entry defines a start/end date, fill color, opacity,
+    //     and a label. The plugin draws a shaded rect spanning the x range and
+    //     the full grid height, then injects a DOM label at the top-left corner.
+    //
+    // (3) dateEvents: each entry defines a date, label, shape, color, and seed.
+    //     The seed makes the Y position deterministic across redraws. A dashed
+    //     guide line connects the event marker to the x-axis baseline.
+
+    var enhRevenueData = [
+      ['2015-01-01', 12.4], ['2015-07-01', 13.1],
+      ['2016-01-01', 14.8], ['2016-07-01', 15.9],
+      ['2017-01-01', 17.1], ['2017-07-01', 16.3],
+      ['2018-01-01', 15.6], ['2018-07-01', 17.2],
+      ['2019-01-01', 21.3], ['2019-07-01', 22.8],
+      ['2020-01-01', 18.9], ['2020-07-01', 17.4],
+      ['2021-01-01', 24.7], ['2021-07-01', 27.1],
+      ['2022-01-01', 28.2], ['2022-07-01', 30.5],
+      ['2023-01-01', 31.5], ['2023-07-01', 33.9],
+      ['2024-01-01', 35.8], ['2024-07-01', 38.2]
+    ];
+
+    $.jqplot('dateenh-chart', [enhRevenueData], {
+      series: [{
+        label:     'Revenue ($M)',
+        color:     '#2980b9',
+        lineWidth:  2.5,
+        fill:       true,
+        fillAlpha:  0.12,
+        markerOptions: { size: 7, style: 'filledCircle' }
+      }],
+      legend: { show: true, location: 'nw' },
+      axes: {
+        xaxis: {
+          renderer:     $.jqplot.DateAxisRenderer,
+          tickInterval: '1 year',
+          // Two-line tick labels: \n in the formatString is converted to <br>
+          // by DateTickFormatter, producing "Jan 1" on line 1 and "2015" on
+          // line 2. Requires CanvasAxisTickRenderer so HTML renders correctly.
+          tickOptions: {
+            formatString: '%Y',
+            angle: -30
+          },
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          label: 'Year'
+        },
+        yaxis: {
+          label:         'Revenue ($M)',
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          min:  0,
+          tickOptions:   { formatString: '$%.0fM' }
+        }
+      },
+
+      // ── dateRanges: shaded rectangular regions with labels ─────────────────
+      // Each range: { start, end, color, opacity, label, labelColor, labelSize }
+      // opacity: 0.0–1.0 (recommend 0.08–0.18 so underlying data stays visible)
+      dateRanges: [
+        { start: '2017-06-01', end: '2018-12-31',
+          color: '#e67e22', opacity: 0.13,
+          label: 'Trade Tensions', labelColor: '#d35400', labelSize: 11 },
+        { start: '2020-01-01', end: '2021-06-30',
+          color: '#e74c3c', opacity: 0.13,
+          label: 'COVID-19 Impact', labelColor: '#c0392b', labelSize: 11 },
+        { start: '2022-10-01', end: '2024-12-31',
+          color: '#27ae60', opacity: 0.10,
+          label: 'Growth Phase', labelColor: '#1e8449', labelSize: 11 }
+      ],
+
+      // ── dateEvents: labeled markers at specific dates ──────────────────────
+      // Each event: { date, label, shape, color, size, seed, labelSize }
+      // | 'diamond' | 'square' | 'triangle'
+      // seed: integer — controls the deterministic Y scatter position
+      dateEvents: [
+        { date: '2016-03-15', label: 'Series B Funding', color: '#8e44ad', size: 7,  labelSize: 10 },
+        { date: '2018-09-01', label: 'Tariff Headwind', color: '#e67e22', size: 7, labelSize: 10 },
+        { date: '2019-04-01', label: 'APAC Expansion', color: '#27ae60', size: 7,  labelSize: 10 },
+        { date: '2020-04-15', label: 'Remote Pivot', color: '#e74c3c', size: 7,  labelSize: 10 },
+        { date: '2021-09-01', label: 'IPO', color: '#2c3e50', size: 9,  labelSize: 11 },
+        { date: '2023-03-01', label: 'AI Product Line', color: '#2980b9', size: 7,  labelSize: 10 }
+      ],
+
+      highlighter: {
+        show:        true,
+        sizeAdjust:  7,
+        tooltipAxes: 'both',
+        formatString: '<strong>%s &nbsp; $%s M</strong>'
+      },
+      cursor: { show: false },
+      grid:   { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+
+    // ── 9. Historical Timeline 1910–2025 ──────────────────────────────────────
+    // A purely annotation-driven chart.  The series is a flat baseline at y=0
+    // spanning the full date range — it exists only to give jqPlot an x-axis
+    // domain to anchor the DateAxisRenderer.  All meaningful content comes from
+    // dateRanges and dateEvents via the dateEnhancement plugin.
+    //
+    // Three range categories (layered by z-draw order, lowest opacity first):
+    //   Green  — major US wars (WW1, WW2, Korea, Vietnam)
+    //   Blue   — US economic recessions post-1960 (NBER official dates)
+    //   Yellow — NASA human spaceflight programs (Gemini, Apollo, Shuttle)
+    //
+    // Five diamond events with title + date in the label:
+    //   Federal Reserve founding · Lindbergh transatlantic flight ·
+    //   Apollo 11 moon landing · Challenger disaster · Fall of Berlin Wall
+
+    // Flat baseline — two anchor points define the x-axis span.
+    var historyBaseline = [
+        ['1910-01-01', 0],
+        ['2025-01-01', 0]
+    ];
+
+    $.jqplot('history-chart', [historyBaseline], {
+      series: [{
+        label:     'Timeline',
+        color:     'transparent',
+        lineWidth:  0,
+        showMarker: false,
+        shadow:     false
+      }],
+      legend: { show: false },
+      axes: {
+        xaxis: {
+          renderer:     $.jqplot.DateAxisRenderer,
+          min:          '1910-01-01',
+          max:          '2025-01-01',
+          tickInterval: '10 years',
+          tickOptions:  { formatString: '%Y', angle: -30 },
+          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+          label:         'Year'
+        },
+        yaxis: {
+          // Hide the y-axis entirely — this chart is all about the x-axis.
+          showTicks:     false,
+          showTickMarks: false,
+          min: -1,
+          max:  1,
+          tickOptions: { show: false }
+        }
+      },
+
+      // ── Wars — green ────────────────────────────────────────────────────────
+      // ── Recessions — blue ───────────────────────────────────────────────────
+      // ── NASA programs — yellow ──────────────────────────────────────────────
+      // Ranges are drawn in order; later entries paint over earlier ones where
+      // they overlap, so we draw wars first (widest), then recessions (narrow),
+      // then NASA (distinct era) to keep each category legible.
+      dateRanges: [
+
+        // ── Wars (green) ──────────────────────────────────────────────────────
+        { start: '1914-07-28', end: '1918-11-11',
+          color: '#27ae60', opacity: 0.18,
+          label: 'WW1', labelColor: '#1e8449', labelSize: 14 },
+
+        { start: '1939-09-01', end: '1945-09-02',
+          color: '#27ae60', opacity: 0.18,
+          label: 'WW2', labelColor: '#1e8449', labelSize: 14 },
+
+        { start: '1950-06-25', end: '1953-07-27',
+          color: '#27ae60', opacity: 0.18,
+          label: 'Korea', labelColor: '#1e8449', labelSize: 14 },
+
+        { start: '1955-11-01', end: '1975-04-30',
+          color: '#27ae60', opacity: 0.18,
+          label: 'Vietnam', labelColor: '#1e8449', labelSize: 14 },
+
+        // ── Recessions post-1960 (NBER official dates, blue) ─────────────────
+        { start: '1960-04-01', end: '1961-02-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '1969-12-01', end: '1970-11-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '1973-11-01', end: '1975-03-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '1980-01-01', end: '1980-07-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '1981-07-01', end: '1982-11-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '1990-07-01', end: '1991-03-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '2001-03-01', end: '2001-11-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '2007-12-01', end: '2009-06-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        { start: '2020-02-01', end: '2020-04-01',
+          color: '#2980b9', opacity: 0.20,
+          label: "Recession", labelColor: '#1a5276', labelSize: 14 },
+
+        // ── NASA programs (yellow/gold) ────────────────────────────────────────
+        { start: '1964-04-08', end: '1966-11-15',
+          color: '#f1c40f', opacity: 0.22,
+          label: 'Gemini', labelColor: '#9a7d0a', labelSize: 14 },
+
+        { start: '1968-10-11', end: '1972-12-19',
+          color: '#f1c40f', opacity: 0.22,
+          label: 'Apollo', labelColor: '#9a7d0a', labelSize: 14 },
+
+        { start: '1981-04-12', end: '2011-07-21',
+          color: '#f1c40f', opacity: 0.22,
+          label: 'Space Shuttle', labelColor: '#9a7d0a', labelSize: 14 }
+      ],
+
+      // ── Key historical events ──────────────────────────────────────────────
+      // Labels include both the event title and its date for full context.
+      // Seeds are spread apart to encourage vertical separation.
+      dateEvents: [
+        { date:  '1913-12-23',
+          label: 'Federal Reserve Founded\nDec 23, 1913',
+          color: '#8e44ad', size: 7,  labelSize: 10 },
+
+        { date:  '1927-05-20',
+          label: 'Lindbergh Transatlantic Flight\nMay 20, 1927',
+          color: '#e67e22', size: 7, labelSize: 10 },
+
+        { date:  '1969-07-20',
+          label: 'Apollo 11 Moon Landing\nJul 20, 1969',
+          color: '#2c3e50', size: 9,  labelSize: 10 },
+
+        { date:  '1986-01-28',
+          label: 'Challenger Disaster\nJan 28, 1986',
+          color: '#e74c3c', size: 7, labelSize: 10 },
+
+        { date:  '1989-11-09',
+          label: 'Fall of Berlin Wall\nNov 9, 1989',
+          color: '#27ae60', size: 7, labelSize: 10 }
+      ],
+
+      cursor:      { show: false },
+      highlighter: { show: false },
+      grid:        { shadow: false, background: '#fafbfc', borderColor: '#e0e0e0' }
+    });
+
+  });
+  </script>
+
+</body>
+</html>

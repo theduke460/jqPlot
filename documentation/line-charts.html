@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Line Charts — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Line Charts</h1>
+<p class="page-subtitle">Single series, multi-series, filled area, trendlines, and Bézier curves.</p>
+
+<h2>Basic Line Chart</h2>
+<div class="card">
+  <p>
+    The default jqPlot series renderer draws a line chart. Pass a single inner array for one
+    series, or multiple inner arrays for multiple series. Data points can be plain numbers
+    (x inferred from index) or explicit <code>[x, y]</code> pairs.
+  </p>
+  <pre><code>$.jqplot('chart', [
+  [14, 22, 18, 31, 27, 35]   // one series — x = 1,2,3,4,5,6
+], {
+  series: [{
+    label:     'Revenue',
+    color:     '#2980b9',
+    lineWidth:  2.5,
+    markerOptions: { size: 7, style: 'filledCircle' }
+  }],
+  legend: { show: true, location: 'nw' },
+  axes: {
+    xaxis: { label: 'Month' },
+    yaxis: {
+      label:         'Revenue ($k)',
+      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+      tickOptions:   { formatString: '$%dk' }
+    }
+  }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo2.html">See demo2 →</a>
+</div>
+
+<h2>Multi-Series Line Chart</h2>
+<div class="card">
+  <p>
+    Pass multiple inner arrays — one per series. The <code>series</code> array provides
+    per-series overrides; index 0 in <code>series</code> corresponds to index 0 in the data array.
+  </p>
+  <pre><code>var revenue = [14, 22, 18, 31, 27, 35];
+var cost    = [10, 15, 13, 19, 17, 22];
+var profit  = revenue.map(function(r,i){ return r - cost[i]; });
+
+$.jqplot('chart', [revenue, cost, profit], {
+  series: [
+    { label: 'Revenue', color: '#2980b9' },
+    { label: 'Cost',    color: '#e74c3c' },
+    { label: 'Profit',  color: '#27ae60' }
+  ],
+  legend: { show: true, location: 'nw' }
+});</code></pre>
+  <div class="note">
+    The <code>series</code> array is positional — element 0 styles the first data array,
+    element 1 styles the second, and so on.
+  </div>
+</div>
+
+<h2>Filled Area Chart</h2>
+<div class="card">
+  <p>
+    Set <code>fill: true</code> on a series to shade the area below the line.
+    <code>fillAlpha</code> controls opacity (0–1). Works well for showing trends
+    where the area under the curve has meaning.
+  </p>
+  <pre><code>$.jqplot('chart', [revenueData], {
+  series: [{
+    label:     'Annual Revenue',
+    color:     '#8e44ad',
+    lineWidth:  2.5,
+    fill:       true,
+    fillAlpha:  0.15,          // subtle fill
+    markerOptions: { size: 8, style: 'filledCircle' }
+  }]
+});</code></pre>
+</div>
+
+<h2>Trendline</h2>
+<div class="card">
+  <p>
+    The <code>trendline</code> plugin adds a best-fit regression line to any series.
+    Include <code>jqplot.trendline.min.js</code> and add a <code>trendline</code> object
+    to the series configuration.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.trendline.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [salesData], {
+  series: [{
+    label: 'Monthly Sales',
+    color: '#2980b9',
+    trendline: {
+      show:      true,
+      color:     '#e74c3c',
+      lineWidth:  2,
+      label:     'Trend'
+    }
+  }]
+});</code></pre>
+  <a class="demo-link" href="../demo/demo4.html">See demo4 →</a>
+</div>
+
+<h2>Bézier Curve Chart</h2>
+<div class="card">
+  <p>
+    <code>BezierCurveRenderer</code> draws smooth curves between data points using
+    cubic Bézier interpolation. Useful when the underlying function is smooth and
+    linear interpolation looks jagged.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.BezierCurveRenderer.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [seriesA, seriesB], {
+  seriesDefaults: {
+    renderer: $.jqplot.BezierCurveRenderer,
+    showMarker: false
+  },
+  series: [
+    { label: 'Product A', color: '#2980b9' },
+    { label: 'Product B', color: '#e67e22' }
+  ]
+});</code></pre>
+  <a class="demo-link" href="../demo/demo3.html">See demo3 →</a>
+</div>
+
+<h2>Common Series Options</h2>
+<div class="card">
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>color</code></td><td>String</td><td>auto</td><td>CSS color for line and markers</td></tr>
+    <tr><td><code>lineWidth</code></td><td>Number</td><td>2.5</td><td>Stroke width in pixels</td></tr>
+    <tr><td><code>linePattern</code></td><td>String</td><td><code>'solid'</code></td><td><code>'solid'</code>, <code>'dashed'</code>, <code>'dotted'</code></td></tr>
+    <tr><td><code>showMarker</code></td><td>Boolean</td><td>true</td><td>Show point markers</td></tr>
+    <tr><td><code>markerOptions.size</code></td><td>Number</td><td>9</td><td>Marker diameter in pixels</td></tr>
+    <tr><td><code>markerOptions.style</code></td><td>String</td><td><code>'filledCircle'</code></td><td><code>'circle'</code>, <code>'square'</code>, <code>'diamond'</code>, <code>'filledCircle'</code>, <code>'filledSquare'</code>, <code>'filledDiamond'</code>, <code>'x'</code>, <code>'plus'</code></td></tr>
+    <tr><td><code>fill</code></td><td>Boolean</td><td>false</td><td>Fill area below the line</td></tr>
+    <tr><td><code>fillAlpha</code></td><td>Number</td><td>0.2</td><td>Fill opacity 0–1</td></tr>
+    <tr><td><code>shadow</code></td><td>Boolean</td><td>true</td><td>Drop shadow on line</td></tr>
+    <tr><td><code>label</code></td><td>String</td><td>''</td><td>Legend entry label</td></tr>
+  </table>
+</div>
+
+<h2>Y-Axis Auto-Scaling</h2>
+<div class="card">
+  <p>
+    Avoid hardcoding <code>min</code> and <code>max</code> unless you have a specific reason.
+    jqPlot autoscales from the data range by default. Use <code>padMin</code> and <code>padMax</code>
+    to add breathing room without clipping:
+  </p>
+  <pre><code>yaxis: {
+  // No min/max — autoscale from data
+  padMin: 1.03,   // 3% below data minimum
+  padMax: 1.03,   // 3% above data maximum
+  tickOptions: { formatString: '%d' }
+}</code></pre>
+  <div class="warn">
+    Setting <code>min: 0</code> on a y-axis whose data can go negative will clip the
+    negative values silently. Always check the actual data range before hardcoding axis bounds.
+  </div>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

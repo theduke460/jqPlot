@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axis Types — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Axis Types</h1>
+<p class="page-subtitle">Linear, logarithmic, date/time, and category axis renderers.</p>
+
+<h2>Linear Axis (Default)</h2>
+<div class="card">
+  <p>
+    The default axis renderer. Evenly-spaced numeric ticks. Configure tick format,
+    min/max, and label via the axis options object.
+  </p>
+  <pre><code>axes: {
+  yaxis: {
+    label:         'Revenue ($M)',
+    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+    min:   0,
+    padMax: 1.05,               // 5% breathing room above max data value
+    tickOptions: {
+      formatString: '$%.1fM'    // sprintf format
+    }
+  }
+}</code></pre>
+  <div class="note">
+    <code>CanvasAxisLabelRenderer</code> and <code>CanvasAxisTickRenderer</code> are required
+    for angled tick labels. Always load <code>canvasTextRenderer</code> first:
+    <pre><code>&lt;script src="dist/plugins/jqplot.canvasTextRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.canvasAxisLabelRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.canvasAxisTickRenderer.min.js"&gt;&lt;/script&gt;</code></pre>
+  </div>
+</div>
+
+<h2>Logarithmic Axis</h2>
+<div class="card">
+  <p>
+    Use <code>LogAxisRenderer</code> when data spans multiple orders of magnitude.
+    Each major tick represents a power of the base (default 10). Both axes can be
+    log-scaled independently for a log-log plot.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.logAxisRenderer.min.js"&gt;&lt;/script&gt;
+
+axes: {
+  yaxis: {
+    renderer:         $.jqplot.LogAxisRenderer,
+    label:            'Colony Count (log scale)',
+    labelRenderer:    $.jqplot.CanvasAxisLabelRenderer,
+    // base: 10 is default — each gridline = 10× increase
+    tickDistribution: 'even',   // ticks at 10^n values
+    tickOptions: { formatString: '%\'d' }
+  }
+}</code></pre>
+  <div class="warn">
+    <strong>Log of zero is undefined.</strong> The axis <code>min</code> must always be
+    greater than zero. Data points at or below zero will produce errors or invisible series.
+  </div>
+
+  <h3>Log-Log Plot</h3>
+  <p>Apply <code>LogAxisRenderer</code> to both axes for a log-log chart. The inverse-square
+  law (<code>P ∝ 1/d²</code>) produces a straight line on a log-log scale:</p>
+  <pre><code>axes: {
+  xaxis: {
+    renderer:         $.jqplot.LogAxisRenderer,
+    tickDistribution: 'even',
+    tickOptions:      { formatString: '%dm' }
+  },
+  yaxis: {
+    renderer:         $.jqplot.LogAxisRenderer,
+    tickDistribution: 'even',
+    tickOptions:      { formatString: '%.4f' }
+  }
+}</code></pre>
+  <a class="demo-link" href="../demo/demo5.html">See demo5 →</a>
+  <a class="demo-link" href="../demo/demo6.html" style="margin-left:.5rem">See demo6 →</a>
+</div>
+
+<h2>Date Axis</h2>
+<div class="card">
+  <p>
+    <code>DateAxisRenderer</code> parses date strings and converts them to millisecond
+    timestamps internally. Data points are <code>['YYYY-MM-DD', value]</code> pairs.
+    Tick labels are formatted with strftime codes.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.dateAxisRenderer.min.js"&gt;&lt;/script&gt;
+
+var data = [
+  ['2020-01-01', 18.9],
+  ['2021-01-01', 24.7],
+  ['2022-01-01', 28.2],
+  ['2023-01-01', 31.5]
+];
+
+axes: {
+  xaxis: {
+    renderer:     $.jqplot.DateAxisRenderer,
+    tickInterval: '1 year',         // '1 year' | '6 months' | '1 day' etc.
+    tickOptions:  { formatString: '%Y', angle: -30 },
+    label:        'Year',
+    labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+  }
+}</code></pre>
+
+  <h3>strftime Format Codes</h3>
+  <table>
+    <tr><th>Code</th><th>Example</th><th>Description</th></tr>
+    <tr><td><code>%Y</code></td><td>2024</td><td>Four-digit year</td></tr>
+    <tr><td><code>%y</code></td><td>24</td><td>Two-digit year</td></tr>
+    <tr><td><code>%B</code></td><td>September</td><td>Full month name</td></tr>
+    <tr><td><code>%b</code></td><td>Sep</td><td>Abbreviated month name</td></tr>
+    <tr><td><code>%m</code></td><td>09</td><td>Two-digit month</td></tr>
+    <tr><td><code>%d</code></td><td>05</td><td>Two-digit day of month</td></tr>
+    <tr><td><code>%e</code></td><td>5</td><td>One or two-digit day</td></tr>
+    <tr><td><code>%H</code></td><td>23</td><td>Hours (24-hour, two digits)</td></tr>
+    <tr><td><code>%M</code></td><td>09</td><td>Minutes (two digits)</td></tr>
+    <tr><td><code>%S</code></td><td>02</td><td>Seconds (two digits)</td></tr>
+    <tr><td><code>%v</code></td><td>3-Sep-2024</td><td>Shortcut: <code>%e-%b-%Y</code></td></tr>
+    <tr><td><code>%F</code></td><td>2024-09-03</td><td>Shortcut: <code>%Y-%m-%d</code></td></tr>
+    <tr><td><code>%T</code></td><td>14:30:00</td><td>Shortcut: <code>%H:%M:%S</code></td></tr>
+    <tr><td><code>%n</code></td><td>(newline)</td><td>Line break — splits tick label onto two lines when used with <code>CanvasAxisTickRenderer</code></td></tr>
+  </table>
+
+  <h3>Date Conversion Inside Plugins</h3>
+  <p>
+    After <code>DateAxisRenderer.init()</code> runs, all x-values in the series data are
+    converted to millisecond timestamps via <code>new $.jsDate(val).getTime()</code>.
+    When writing plugins that need to convert date strings to pixel positions:
+  </p>
+  <pre><code>// Inside a postDrawHooks handler:
+var ts  = new $.jsDate('2024-06-01').getTime();
+var xPx = plot._gridPadding.left + plot.axes.xaxis.series_u2p(ts);
+
+// Detect DateAxisRenderer at hook time (renderer is an INSTANCE, not a class):
+var isDateAxis = (xaxis.renderer instanceof $.jqplot.DateAxisRenderer);</code></pre>
+  <div class="warn">
+    By the time <code>postDrawHooks</code> fire, <code>axis.renderer</code> is an
+    <em>instance</em> of the renderer class, not the class itself. Use
+    <code>instanceof</code> — not <code>===</code> — for type detection.
+  </div>
+  <a class="demo-link" href="../demo/demo6.html">See demo6 →</a>
+</div>
+
+<h2>Category Axis</h2>
+<div class="card">
+  <p>
+    Assigns one evenly-spaced slot per data point with no numeric scale implied.
+    String tick labels come from the <code>ticks</code> array. The primary use case
+    is bar charts where x-axis categories are labels, not numbers.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.categoryAxisRenderer.min.js"&gt;&lt;/script&gt;
+
+axes: {
+  xaxis: {
+    renderer:    $.jqplot.CategoryAxisRenderer,
+    ticks:       ['Engineering','Marketing','Operations','HR','Sales'],
+    tickOptions: { angle: -25 }   // rotate labels to avoid overlap
+  }
+}</code></pre>
+
+  <h3>Category Axis on Horizontal Bar Charts</h3>
+  <p>
+    For horizontal bars, the <strong>y-axis</strong> gets <code>CategoryAxisRenderer</code>.
+    Use blank guard ticks at positions 1 and N to prevent bars touching axis edges.
+    Bar data y-indices must match the named tick positions exactly.
+  </p>
+  <pre><code>// Ticks: blank at 1, named at 2–6, blank at 7
+// Bar data uses y = 2,3,4,5,6 to land on the named positions
+axes: {
+  yaxis: {
+    renderer: $.jqplot.CategoryAxisRenderer,
+    ticks: ['', 'Discovery', 'Design', 'Development', 'Testing', 'Deployment', ''],
+    pad: 1.0
+  }
+}</code></pre>
+  <div class="note">
+    <strong>NaN coordinates:</strong> Passing plain string arrays as <code>ticks</code>
+    on a <em>LinearAxisRenderer</em> axis causes <code>tickInterval = NaN</code> and
+    makes all series coordinates NaN. Canvas silently ignores <code>lineTo(NaN, y)</code>,
+    so the series disappears while DOM elements (legend, axis labels) still render.
+    Always use <code>CategoryAxisRenderer</code> for string-labelled axes.
+  </div>
+  <a class="demo-link" href="../demo/demo5.html">See demo5 →</a>
+  <a class="demo-link" href="../demo/demo6.html" style="margin-left:.5rem">See demo6 →</a>
+</div>
+
+<h2>Common Axis Options</h2>
+<div class="card">
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>renderer</code></td><td>Class</td><td>Axis renderer. Default: <code>$.jqplot.LinearAxisRenderer</code></td></tr>
+    <tr><td><code>label</code></td><td>String</td><td>Axis title text</td></tr>
+    <tr><td><code>labelRenderer</code></td><td>Class</td><td>Use <code>$.jqplot.CanvasAxisLabelRenderer</code> for rotated labels</td></tr>
+    <tr><td><code>min</code> / <code>max</code></td><td>Number</td><td>Explicit axis bounds. Omit for autoscaling.</td></tr>
+    <tr><td><code>padMin</code> / <code>padMax</code></td><td>Number</td><td>Autoscale padding multiplier. 1.05 = 5% extra room.</td></tr>
+    <tr><td><code>tickInterval</code></td><td>Number/String</td><td>Spacing between ticks. String form for dates: <code>'1 year'</code></td></tr>
+    <tr><td><code>numberTicks</code></td><td>Number</td><td>Target tick count (overridden by <code>tickInterval</code>)</td></tr>
+    <tr><td><code>ticks</code></td><td>Array</td><td>Manual tick values. Elements can be values or <code>[value, label]</code> pairs.</td></tr>
+    <tr><td><code>tickOptions.formatString</code></td><td>String</td><td>sprintf format for tick labels</td></tr>
+    <tr><td><code>tickOptions.angle</code></td><td>Number</td><td>Label rotation in degrees. Requires <code>CanvasAxisTickRenderer</code>.</td></tr>
+    <tr><td><code>showTicks</code></td><td>Boolean</td><td>Show/hide tick marks and labels</td></tr>
+  </table>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

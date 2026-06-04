@@ -195,7 +195,11 @@
         this._offsets = offsets;
         var klass = 'jqplot-blockCanvas';
         if (clss != undefined) {
-            klass = clss;
+            // Core passes 'jqplot-series-canvas' as clss, overriding the default.
+            // We keep the passed class but always ADD jqplot-blockCanvas as well
+            // so CSS rules can reliably target block chart label divs via
+            // .jqplot-blockCanvas div regardless of what core passes.
+            klass = clss + ' jqplot-blockCanvas';
         }
         var elem;
         // if this canvas already has a dom element, don't make a new one.

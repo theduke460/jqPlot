@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specialized Charts — jqPlot Docs</title>
+  <link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<nav class="docs-nav">
+  <span class="nav-home">📊</span>
+  <a href="index.html"><strong>jqPlot Docs</strong></a>
+  <a href="line-charts.html">Line Charts</a>
+  <a href="bar-charts.html">Bar Charts</a>
+  <a href="pie-donut.html">Pie &amp; Donut</a>
+  <a href="specialized.html">Specialized</a>
+  <a href="axis-types.html">Axis Types</a>
+  <a href="plugins.html">Plugins</a>
+  <a href="date-enhancement.html">Date Enhancement</a>
+</nav>
+
+<h1>Specialized Charts</h1>
+<p class="page-subtitle">Bubble, candlestick, meter gauge, funnel, pyramid, block, and Mekko charts.</p>
+
+<h2>Bubble Chart</h2>
+<div class="card">
+  <p>
+    Data points are <code>[x, y, radius, {label}]</code> four-element arrays.
+    The third element is the bubble radius in data units; the optional fourth element
+    is an object that may include a <code>label</code> string shown inside the bubble.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.bubbleRenderer.min.js"&gt;&lt;/script&gt;
+
+var bubbles = [
+  [25, 30, 8,  { label: 'Alpha' }],
+  [40, 55, 12, { label: 'Beta'  }],
+  [60, 20, 6,  { label: 'Gamma' }]
+];
+
+$.jqplot('chart', [bubbles], {
+  seriesDefaults: {
+    renderer: $.jqplot.BubbleRenderer,
+    rendererOptions: {
+      bubbleAlpha:      0.7,
+      showLabels:       true,
+      bubbleGradients:  false
+    }
+  }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo2.html">See demo2 →</a>
+</div>
+
+<h2>Candlestick (OHLC) Chart</h2>
+<div class="card">
+  <p>
+    Data points are <code>[date, open, high, low, close]</code> five-element arrays.
+    Set <code>candleStick: true</code> for filled candles; <code>false</code> for
+    classic OHLC tick marks. Requires <code>DateAxisRenderer</code> on the x-axis.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.ohlcRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.dateAxisRenderer.min.js"&gt;&lt;/script&gt;
+
+var ohlc = [
+  ['2024-01-02', 182.5, 188.2, 181.0, 186.4],
+  ['2024-01-03', 186.4, 189.5, 184.3, 185.9],
+  ['2024-01-04', 185.9, 187.8, 183.1, 184.7]
+];
+
+$.jqplot('chart', [ohlc], {
+  series: [{
+    renderer:        $.jqplot.OHLCRenderer,
+    rendererOptions: { candleStick: true }
+  }],
+  axes: {
+    xaxis: {
+      renderer:    $.jqplot.DateAxisRenderer,
+      tickOptions: { formatString: '%b %e' }
+    }
+  }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo2.html">See demo2 →</a>
+</div>
+
+<h2>Meter Gauge</h2>
+<div class="card">
+  <p>
+    A single data point drives the gauge needle. <code>intervals</code> defines
+    colored arc segments; <code>intervalColors</code> assigns colors to each.
+    The label shown inside the gauge is the raw value.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.meterGaugeRenderer.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('gauge', [[72]], {
+  seriesDefaults: {
+    renderer: $.jqplot.MeterGaugeRenderer,
+    rendererOptions: {
+      min:            0,
+      max:            100,
+      intervals:      [33, 66, 100],
+      intervalColors: ['#27ae60','#f39c12','#e74c3c'],
+      label:          'CPU %',
+      labelPosition:  'below'
+    }
+  }
+});</code></pre>
+  <div class="warn">
+    <strong>Nginx caching bug:</strong> With <code>expires max</code> headers, browsers
+    may return the parent container height for <code>outerHeight()</code> calls on freshly-inserted
+    <code>position:absolute</code> elements, producing a negative radius and an
+    <code>IndexSizeError</code>. This fork applies a defensive height clamp in the renderer.
+    See <a href="../demo/index.html">Technical Notes Issue 2</a>.
+  </div>
+  <a class="demo-link" href="../demo/demo2.html">See demo2 →</a>
+</div>
+
+<h2>Funnel Chart</h2>
+<div class="card">
+  <p>
+    Data is an array of <code>[label, value]</code> pairs. The renderer sorts them
+    descending automatically. Useful for sales pipelines and conversion funnels.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.funnelRenderer.min.js"&gt;&lt;/script&gt;
+
+var pipeline = [
+  ['Leads',      1240],
+  ['Qualified',   820],
+  ['Proposals',   410],
+  ['Negotiation', 195],
+  ['Closed',       88]
+];
+
+$.jqplot('chart', [pipeline], {
+  seriesDefaults: {
+    renderer: $.jqplot.FunnelRenderer,
+    rendererOptions: {
+      sectionMargin: 6,
+      widthRatio:    0.35,
+      showDataLabels: true
+    }
+  }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo3.html">See demo3 →</a>
+</div>
+
+<h2>Pyramid Chart</h2>
+<div class="card">
+  <p>
+    Used for population pyramids. Data format is <code>[yIndex, value]</code> —
+    note the order: y-index (age group) first, bar width (population) second.
+    Two series (male/female) are passed to create mirrored bars.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.pyramidAxisRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.pyramidGridRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.pyramidRenderer.min.js"&gt;&lt;/script&gt;
+&lt;!-- Load dependency scripts BEFORE the renderer that depends on them --&gt;
+
+var female = [[1,4820],[2,4650],[3,4210],[4,3890],[5,3120]];
+var male   = [[1,4640],[2,4520],[3,4080],[4,3750],[5,2990]];
+
+$.jqplot('chart', [female, male], {
+  seriesDefaults: {
+    renderer: $.jqplot.PyramidRenderer
+  },
+  series: [
+    { label: 'Female', color: '#e91e8c' },
+    { label: 'Male',   color: '#1565c0' }
+  ],
+  axes: {
+    yaxis: {
+      ticks: ['0–9','10–19','20–29','30–39','40–49']
+    }
+  }
+});</code></pre>
+  <div class="warn">
+    <strong>Plugin load order:</strong> <code>pyramidAxisRenderer</code> and
+    <code>pyramidGridRenderer</code> must be loaded <em>before</em>
+    <code>pyramidRenderer</code>. Loading in the wrong order triggers a silent
+    Ajax fallback that fails with a 404.
+  </div>
+  <a class="demo-link" href="../demo/demo3.html">See demo3 →</a>
+</div>
+
+<h2>Block Chart</h2>
+<div class="card">
+  <p>
+    Renders text blocks on a grid. Useful for categorical status dashboards.
+    The background color must be set at the <strong>series level</strong> via
+    <code>rendererOptions.css.background</code> — per-point CSS is applied after
+    <code>init()</code> and is invisible to the legend color system.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.blockRenderer.min.js"&gt;&lt;/script&gt;
+
+var healthy  = [['web-01','OK'],['web-02','OK'],['db-01','OK']];
+var warning  = [['cache-01','WARN']];
+var critical = [['db-02','CRIT']];
+
+$.jqplot('chart', [healthy, warning, critical], {
+  seriesDefaults: {
+    renderer: $.jqplot.BlockRenderer
+  },
+  series: [
+    { label: 'Healthy',
+      rendererOptions: { css: { background: '#27ae60', padding: '5px 7px' } } },
+    { label: 'Warning',
+      rendererOptions: { css: { background: '#e67e22', padding: '5px 7px' } } },
+    { label: 'Critical',
+      rendererOptions: { css: { background: '#c0392b', padding: '5px 7px' } } }
+  ]
+});</code></pre>
+  <a class="demo-link" href="../demo/demo4.html">See demo4 →</a>
+</div>
+
+<h2>Mekko (Marimekko) Chart</h2>
+<div class="card">
+  <p>
+    A stacked bar chart where bar widths are also proportional to a value.
+    Each series is one category; data points are <code>[x, value]</code> pairs
+    representing segments within that category's bar.
+  </p>
+  <pre><code>&lt;script src="dist/plugins/jqplot.mekkoRenderer.min.js"&gt;&lt;/script&gt;
+&lt;script src="dist/plugins/jqplot.mekkoAxisRenderer.min.js"&gt;&lt;/script&gt;
+
+$.jqplot('chart', [northAmerica, europe, asiaPac], {
+  seriesDefaults: {
+    renderer:        $.jqplot.MekkoRenderer,
+    rendererOptions: { borderColor: '#fff', showBorders: true }
+  },
+  axes: {
+    xaxis: { renderer: $.jqplot.MekkoAxisRenderer },
+    yaxis: { min: 0, max: 100 }
+  }
+});</code></pre>
+  <a class="demo-link" href="../demo/demo3.html">See demo3 →</a>
+</div>
+
+<footer>
+  jqPlot modernized fork —
+  <a href="https://github.com/theduke460/jqPlot">github.com/theduke460/jqPlot</a>
+</footer>
+</body>
+</html>

@@ -88,9 +88,31 @@
       font-size: 0.8rem;
       text-align: center;
     }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      color: #2980b9;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .back-link::before { content: "\2190  "; }
+
+    /* Funnel slice labels — white bold with 4-direction black outline */
+    .jqplot-funnel-series.jqplot-data-label {
+      font-weight: bold;
+      color: #fff;
+      text-shadow:  1px  1px 0 #000,
+                   -1px -1px 0 #000,
+                    1px -1px 0 #000,
+                   -1px  1px 0 #000;
+    }
   </style>
 </head>
 <body>
+
+  <a class="back-link" href="index.html">Demo Index</a>
 
   <h1>jqPlot Demo 3</h1>
   <p class="subtitle">Funnel · Mekko · Pyramid · Bézier Curve</p>
